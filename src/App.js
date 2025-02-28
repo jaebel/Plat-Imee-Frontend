@@ -5,16 +5,23 @@ import Navbar from './components/Navbar';
 import SignUp from './pages/SignUp';
 import Login from './pages/Login';
 import { AuthProvider } from './context/AuthContext';
+import PrivateRoute from './components/PrivateRoute';
+import Profile from './pages/Profile';
 
 function App() {
   return (
-    <AuthProvider> {/* let every component have access to auth state and functions */}
+    <AuthProvider>
       <BrowserRouter>
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/profile" element={
+            <PrivateRoute>
+              <Profile />
+            </PrivateRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
