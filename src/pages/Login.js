@@ -1,48 +1,59 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // For redirection after login
-import axiosInstance from '../api/axiosInstance'; // Our configured axios instance
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../api/axiosInstance';
+import { AuthContext } from '../context/AuthContext';
 
 const Login = () => {
+  // A hook is used to programmatically navigate after login.
   const navigate = useNavigate();
-  // State to hold form input for username and password
+
+  // Retrieve the login func from AuthContext to update the global auth state.
+  const { login } = useContext(AuthContext);
+
+  // Local state for form fields, error message, and loading indicator.
   const [form, setForm] = useState({ username: '', password: '' });
-  // State to track error messages and loading status
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Update form state when the user types
+  // Updates our form state as the user types.
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission
+  // Called when the user submits the login form.
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+    e.preventDefault(); // Prevent default form submission behavior (page reload)
+    setError('');       // Clear any previous error messages
+    setLoading(true);   // Set a loading state
+
     try {
-      // Send a POST request to the login endpoint with the username and password
+      // Send a POST request to the login endpoint.
       const response = await axiosInstance.post('/auth/login', form);
-      // Assume the response returns a token on successful authentication
+
+      // Extract the token from the response data.
       const { token } = response.data;
-      // Save the token (e.g., in local storage) for subsequent authenticated requests
-      localStorage.setItem('token', token);
-      // Redirect to the home page (or dashboard)
+      // Call the login function from the context to store the token in global state (and localStorage).
+      login(token);
+      // After successful login, navigate the user to the home page (or dashboard).
       navigate('/');
     } catch (err) {
+      // If there's an error, log it and update the error state.
       console.error(err);
-      // Display an error message from the response or a default message
+      // Show a specific message if available, otherwise a default.
       setError(err.response?.data?.message || 'Login failed.');
     } finally {
-      setLoading(false);
+      setLoading(false); // End the loading state
     }
   };
 
+  // The component's rendered output.
   return (
     <div className="login-container">
       <h1>Login</h1>
+      {/* Conditionally render error messages */}
       {error && <div className="error-message" style={{ color: 'red' }}>{error}</div>}
       <form onSubmit={handleSubmit}>
+        {/* Username field */}
         <div className="form-field">
           <label htmlFor="username">Username:</label>
           <input 
@@ -54,6 +65,7 @@ const Login = () => {
             required 
           />
         </div>
+        {/* Password field */}
         <div className="form-field">
           <label htmlFor="password">Password:</label>
           <input 
