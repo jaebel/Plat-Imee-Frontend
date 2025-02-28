@@ -1,7 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
+import { AuthContext } from '../context/AuthContext';
 
 const SignUp = () => {
+  const navigate = useNavigate();
+  const { token } = useContext(AuthContext);
+
+  // Redirect logged-in users to the home page
+  useEffect(() => {
+    if (token) {
+      navigate('/');
+    }
+  }, [token, navigate]);
+
   const [form, setForm] = useState({
     username: '',
     email: '',
@@ -21,10 +33,10 @@ const SignUp = () => {
     setError('');
     setSuccess('');
     try {
-      // Now just use a relative path since baseURL is configured
       const response = await axiosInstance.post('/users', form);
       setSuccess('User registered successfully!');
       console.log(response.data);
+      navigate('/login');
     } catch (err) {
       console.error(err);
       setError(err.response?.data || 'Registration failed.');

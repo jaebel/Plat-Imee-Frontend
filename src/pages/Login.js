@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
@@ -7,8 +7,15 @@ const Login = () => {
   // A hook is used to programmatically navigate after login.
   const navigate = useNavigate();
 
-  // Retrieve the login func from AuthContext to update the global auth state.
-  const { login } = useContext(AuthContext);
+  // Retrieve the login func and token from AuthContext to update the global auth state.
+  const { token, login } = useContext(AuthContext);
+
+  // Redirect to home if the user is already logged in.
+  useEffect(() => {
+    if (token) {
+      navigate('/');
+    }
+  }, [token, navigate]);
 
   // Local state for form fields, error message, and loading indicator.
   const [form, setForm] = useState({ username: '', password: '' });
