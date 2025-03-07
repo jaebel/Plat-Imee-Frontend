@@ -8,6 +8,7 @@ import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Profile from './pages/Profile';
 import AnimeList from './pages/AnimeList';
+import AnimeDetails from './pages/AnimeDetails';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
               <AnimeList />
             </PrivateRoute>
           } />
+          <Route path="/anime/:id" element={<AnimeDetails />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

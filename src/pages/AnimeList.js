@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../api/axiosInstance';
+import { Link } from 'react-router-dom';
 
 const AnimeList = () => {
   // State to hold the list of anime, loading and error status
@@ -9,6 +10,7 @@ const AnimeList = () => {
 
   // useEffect to fetch the anime data when the component mounts
   useEffect(() => {
+    // Fetch all anime using the backend endpoint
     axiosInstance.get('/anime')
       .then(response => {
         setAnimeList(response.data);
@@ -32,7 +34,10 @@ const AnimeList = () => {
       <ul>
         {animeList.map(anime => (
           <li key={anime.animeId}>
-            <h2>{anime.name}</h2>
+            {/* Wrap anime name in Link so users can navigate to details page */}
+            <Link to={`/anime/${anime.animeId}`}>
+              <h2>{anime.name}</h2>
+            </Link>
             <p>Type: {anime.type}</p>
             <p>Score: {anime.score}</p>
             <p>Episodes: {anime.episodes}</p>
