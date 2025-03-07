@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Profile from './pages/Profile';
+import AnimeList from './pages/AnimeList';
 
 function App() {
   return (
@@ -20,6 +21,11 @@ function App() {
           <Route path="/profile" element={
             <PrivateRoute>
               <Profile />
+            </PrivateRoute>
+          } />
+          <Route path="/anime" element={
+            <PrivateRoute>
+              <AnimeList />
             </PrivateRoute>
           } />
         </Routes>
