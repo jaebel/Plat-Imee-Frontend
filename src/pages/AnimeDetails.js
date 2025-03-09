@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react';
+// AnimeDetails.js
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
+import { AuthContext } from '../context/AuthContext';
 
 const AnimeDetails = () => {
-  // Retrieve the anime id from the URL (e.g., /anime/123)
   const { id } = useParams();
-
-  // Local state for the anime details, loading, and error message
   const [anime, setAnime] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [buttonText, setButtonText] = useState('Add to My List');
+
+  // Pull the user from AuthContext, so we can get the correct userId
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
-    // Fetch the anime details using the provided id
     axiosInstance.get(`/anime/${id}`)
       .then(response => {
         setAnime(response.data);
@@ -25,18 +27,30 @@ const AnimeDetails = () => {
       });
   }, [id]);
 
-  // While waiting for the response, show a loading message
+  const handleAddToList = async () => {
+    try {
+      if (!user || !user.userId) {
+        setButtonText('Not logged in');
+        return;
+      }
+      // Make a POST request with the correct userId and animeId
+      await axiosInstance.post('/user-anime', {
+        userId: user.userId,
+        animeId: anime.animeId
+      });
+      setButtonText('Added');
+    } catch (error) {
+      console.error('Error adding anime:', error);
+      setButtonText('Error');
+    }
+  };
+
   if (loading) return <div>Loading anime details...</div>;
-
-  // If there was an error, display it
   if (error) return <div style={{ color: 'red' }}>{error}</div>;
-
-  // If anime data is not found, display a message
   if (!anime) return <div>No anime found.</div>;
 
   return (
     <div>
-      {/* Display basic anime information */}
       <h1>{anime.name}</h1>
       <p>Type: {anime.type}</p>
       <p>Score: {anime.score}</p>
@@ -44,12 +58,11 @@ const AnimeDetails = () => {
       <p>Genres: {anime.genres.join(", ")}</p>
       <p>Aired: {anime.aired}</p>
       <p>Premiered: {anime.premiered}</p>
-      
-      {/* Optionally display alternate names if available */}
       {anime.englishName && <p>English Name: {anime.englishName}</p>}
       {anime.japaneseName && <p>Japanese Name: {anime.japaneseName}</p>}
-      
-      {/* "Back to List" link to navigate back to the Anime List page */}
+
+      <button onClick={handleAddToList}>{buttonText}</button>
+
       <Link to="/anime" style={{ marginTop: '20px', display: 'inline-block' }}>
         Back to Anime List
       </Link>

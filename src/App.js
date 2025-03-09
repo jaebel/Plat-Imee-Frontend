@@ -9,6 +9,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Profile from './pages/Profile';
 import AnimeList from './pages/AnimeList';
 import AnimeDetails from './pages/AnimeDetails';
+import MyAnimeList from './pages/MyAnimeList';
 
 function App() {
   return (
@@ -16,19 +17,37 @@ function App() {
       <BrowserRouter>
         <Navbar />
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/profile" element={
-            <PrivateRoute>
-              <Profile />
-            </PrivateRoute>
-          } />
-          <Route path="/anime" element={
-            <PrivateRoute>
-              <AnimeList />
-            </PrivateRoute>
-          } />
+          
+          {/* Protected routes */}
+          <Route 
+            path="/profile" 
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/anime" 
+            element={
+              <PrivateRoute>
+                <AnimeList />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/my-anime" 
+            element={
+              <PrivateRoute>
+                <MyAnimeList />
+              </PrivateRoute>
+            } 
+          />
+          
           <Route path="/anime/:id" element={<AnimeDetails />} />
         </Routes>
       </BrowserRouter>

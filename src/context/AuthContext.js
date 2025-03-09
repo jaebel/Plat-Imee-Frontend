@@ -1,19 +1,23 @@
+// AuthContext.js
 import React, { createContext, useState, useEffect } from 'react';
 
 // Create a context with default values
 export const AuthContext = createContext({
-  token: null,        // Initially no token
-  login: (token) => {},  // Function to log in (set the token)
-  logout: () => {}       // Function to log out (clear the token)
+  token: null,          // JWT token
+  user: null,           // Object with user info, e.g. { userId, username, email }
+  login: () => {},      // Function to log in
+  logout: () => {}      // Function to log out
 });
 
-// AuthProvider to wrap around app
-// Provides the AuthContext value to all child components so like props but not
 export const AuthProvider = ({ children }) => {
-  // Initialize the token state from localStorage (if available)
+  // Read initial token and user from localStorage
   const [token, setToken] = useState(() => localStorage.getItem('token'));
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
-  // Keep localStorage in sync with the token state
+  // Keep localStorage in sync with the token
   useEffect(() => {
     if (token) {
       localStorage.setItem('token', token);
@@ -22,18 +26,29 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  // Define a function to log in (set the token)
-  const login = (newToken) => {
+  // Keep localStorage in sync with the user object
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, [user]);
+
+  // Define a function to log in
+  const login = (newToken, userData) => {
     setToken(newToken);
+    setUser(userData);
   };
 
-  // Define a function to log out (clear the token)
+  // Define a function to log out
   const logout = () => {
     setToken(null);
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{ token, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
