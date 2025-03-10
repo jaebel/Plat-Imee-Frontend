@@ -3,7 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import axiosInstance from '../api/axiosInstance';
 import { Link } from 'react-router-dom';
 
-// The different statuses your user-anime might have
+// Define the various status tabs
 const TABS = [
   { label: 'All Anime', value: 'ALL' },
   { label: 'Currently Watching', value: 'WATCHING' },
@@ -16,14 +16,15 @@ const TABS = [
 const MyAnimeList = () => {
   const { user } = useContext(AuthContext);
 
-  // The raw user-anime records from the backend
+  // All user-anime records
   const [records, setRecords] = useState([]);
-  // UI state: loading spinner and errors
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  // Current active tab (ALL, WATCHING, COMPLETED, etc.)
+
+  // Active tab (status)
   const [activeTab, setActiveTab] = useState('ALL');
-  // For inline editing
+
+  // Inline editing state
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({
     status: '',
@@ -31,7 +32,7 @@ const MyAnimeList = () => {
     episodesWatched: ''
   });
 
-  // Fetch user-anime records once user is loaded
+  // Fetch user-anime records once user is known
   useEffect(() => {
     if (!user || !user.userId) {
       setError('No user logged in.');
@@ -51,12 +52,12 @@ const MyAnimeList = () => {
       });
   }, [user]);
 
-  // Filter records based on the active tab
+  // Filter records based on active tab
   const filteredRecords = activeTab === 'ALL'
     ? records
     : records.filter(rec => rec.status === activeTab);
 
-  // Enter editing mode for a specific record
+  // Start editing a record
   const handleEditClick = (record) => {
     setEditingId(record.id);
     setEditData({
@@ -72,7 +73,7 @@ const MyAnimeList = () => {
     setEditData({ status: '', rating: '', episodesWatched: '' });
   };
 
-  // Update local editData when form fields change
+  // Handle input changes in the edit form
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setEditData(prev => ({ ...prev, [name]: value }));
@@ -89,9 +90,8 @@ const MyAnimeList = () => {
     axiosInstance.patch(`/user-anime/${recordId}`, payload)
       .then(res => {
         const updated = res.data;
-        // Update local state with the updated record
+        // Update local records
         setRecords(prev => prev.map(r => (r.id === recordId ? updated : r)));
-        // Exit editing mode
         setEditingId(null);
       })
       .catch(err => {
@@ -100,13 +100,30 @@ const MyAnimeList = () => {
       });
   };
 
+  // Delete a record via DELETE
+  const handleDelete = (recordId) => {
+    if (!window.confirm('Are you sure you want to remove this anime from your list?')) {
+      return;
+    }
+    axiosInstance.delete(`/user-anime/${recordId}`)
+      .then(() => {
+        // Remove it from local state
+        setRecords(prev => prev.filter(r => r.id !== recordId));
+      })
+      .catch(err => {
+        console.error('Error deleting record:', err);
+        alert('Failed to delete record.');
+      });
+  };
+
   if (loading) return <div>Loading your anime list...</div>;
   if (error) return <div style={{ color: 'red' }}>{error}</div>;
+  if (!user) return <div style={{ color: 'red' }}>No user logged in.</div>;
 
   return (
     <div style={{ padding: '1em' }}>
       <h1>My Anime List</h1>
-      
+
       {/* Tabs for filtering by status */}
       <div style={{ marginBottom: '1em' }}>
         {TABS.map(tab => (
@@ -123,7 +140,6 @@ const MyAnimeList = () => {
         ))}
       </div>
 
-      {/* If no records in the chosen tab */}
       {filteredRecords.length === 0 ? (
         <p>No anime found in this category.</p>
       ) : (
@@ -145,7 +161,6 @@ const MyAnimeList = () => {
                 <tr key={rec.id} style={{ borderBottom: '1px solid #ccc' }}>
                   <td>{idx + 1}</td>
                   <td>
-                    {/* Link to anime details page if you have it */}
                     <Link to={`/anime/${rec.animeId}`}>
                       {rec.animeId}
                     </Link>
@@ -206,7 +221,15 @@ const MyAnimeList = () => {
                         <button onClick={handleCancelEdit} style={{ marginLeft: '0.5em' }}>Cancel</button>
                       </>
                     ) : (
-                      <button onClick={() => handleEditClick(rec)}>Edit</button>
+                      <>
+                        <button onClick={() => handleEditClick(rec)}>Edit</button>
+                        <button
+                          onClick={() => handleDelete(rec.id)}
+                          style={{ marginLeft: '0.5em', color: 'red' }}
+                        >
+                          Delete
+                        </button>
+                      </>
                     )}
                   </td>
                 </tr>
