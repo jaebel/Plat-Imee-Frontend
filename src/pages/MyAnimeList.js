@@ -1,25 +1,47 @@
-// MyAnimeList.js
 import React, { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
-import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
+import axiosInstance from '../api/axiosInstance';
+import { Link } from 'react-router-dom';
+
+// The different statuses your user-anime might have
+const TABS = [
+  { label: 'All Anime', value: 'ALL' },
+  { label: 'Currently Watching', value: 'WATCHING' },
+  { label: 'Completed', value: 'COMPLETED' },
+  { label: 'On Hold', value: 'ON_HOLD' },
+  { label: 'Dropped', value: 'DROPPED' },
+  { label: 'Plan to Watch', value: 'PLAN_TO_WATCH' },
+];
 
 const MyAnimeList = () => {
   const { user } = useContext(AuthContext);
-  const [myAnimeList, setMyAnimeList] = useState([]);
+
+  // The raw user-anime records from the backend
+  const [records, setRecords] = useState([]);
+  // UI state: loading spinner and errors
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // Current active tab (ALL, WATCHING, COMPLETED, etc.)
+  const [activeTab, setActiveTab] = useState('ALL');
+  // For inline editing
+  const [editingId, setEditingId] = useState(null);
+  const [editData, setEditData] = useState({
+    status: '',
+    rating: '',
+    episodesWatched: ''
+  });
 
+  // Fetch user-anime records once user is loaded
   useEffect(() => {
     if (!user || !user.userId) {
-      setError('No user ID found. Please log in.');
+      setError('No user logged in.');
       setLoading(false);
       return;
     }
 
     axiosInstance.get(`/user-anime?userId=${user.userId}`)
-      .then(response => {
-        setMyAnimeList(response.data);
+      .then(res => {
+        setRecords(res.data);
         setLoading(false);
       })
       .catch(err => {
@@ -29,30 +51,174 @@ const MyAnimeList = () => {
       });
   }, [user]);
 
+  // Filter records based on the active tab
+  const filteredRecords = activeTab === 'ALL'
+    ? records
+    : records.filter(rec => rec.status === activeTab);
+
+  // Enter editing mode for a specific record
+  const handleEditClick = (record) => {
+    setEditingId(record.id);
+    setEditData({
+      status: record.status || '',
+      rating: record.rating !== null ? record.rating.toString() : '',
+      episodesWatched: record.episodesWatched !== null ? record.episodesWatched.toString() : ''
+    });
+  };
+
+  // Cancel editing
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditData({ status: '', rating: '', episodesWatched: '' });
+  };
+
+  // Update local editData when form fields change
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Save the updated record via PATCH
+  const handleSave = (recordId) => {
+    const payload = {
+      status: editData.status || null,
+      rating: editData.rating !== '' ? parseFloat(editData.rating) : null,
+      episodesWatched: editData.episodesWatched !== '' ? parseInt(editData.episodesWatched, 10) : null
+    };
+
+    axiosInstance.patch(`/user-anime/${recordId}`, payload)
+      .then(res => {
+        const updated = res.data;
+        // Update local state with the updated record
+        setRecords(prev => prev.map(r => (r.id === recordId ? updated : r)));
+        // Exit editing mode
+        setEditingId(null);
+      })
+      .catch(err => {
+        console.error('Error updating record:', err);
+        alert('Failed to update record.');
+      });
+  };
+
   if (loading) return <div>Loading your anime list...</div>;
   if (error) return <div style={{ color: 'red' }}>{error}</div>;
 
   return (
-    <div>
+    <div style={{ padding: '1em' }}>
       <h1>My Anime List</h1>
-      {myAnimeList.length === 0 ? (
-        <p>You have not added any anime yet.</p>
+      
+      {/* Tabs for filtering by status */}
+      <div style={{ marginBottom: '1em' }}>
+        {TABS.map(tab => (
+          <button
+            key={tab.value}
+            onClick={() => setActiveTab(tab.value)}
+            style={{
+              fontWeight: activeTab === tab.value ? 'bold' : 'normal',
+              marginRight: '0.5em'
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* If no records in the chosen tab */}
+      {filteredRecords.length === 0 ? (
+        <p>No anime found in this category.</p>
       ) : (
-        <ul>
-          {myAnimeList.map((anime) => (
-            <li key={anime.id}>
-              {/* Link to the anime details page */}
-              <Link to={`/anime/${anime.animeId}`}>
-                <h2>Anime ID: {anime.animeId}</h2>
-              </Link>
-              {/* Display any info from the response: status, rating, etc. */}
-              <p>Status: {anime.status}</p>
-              <p>Rating: {anime.rating}</p>
-              <p>Episodes Watched: {anime.episodesWatched}</p>
-            </li>
-          ))}
-        </ul>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid #ccc' }}>
+              <th style={{ textAlign: 'left' }}>#</th>
+              <th style={{ textAlign: 'left' }}>Anime ID</th>
+              <th style={{ textAlign: 'left' }}>Status</th>
+              <th style={{ textAlign: 'left' }}>Rating</th>
+              <th style={{ textAlign: 'left' }}>Episodes</th>
+              <th style={{ textAlign: 'left' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredRecords.map((rec, idx) => {
+              const isEditing = editingId === rec.id;
+              return (
+                <tr key={rec.id} style={{ borderBottom: '1px solid #ccc' }}>
+                  <td>{idx + 1}</td>
+                  <td>
+                    {/* Link to anime details page if you have it */}
+                    <Link to={`/anime/${rec.animeId}`}>
+                      {rec.animeId}
+                    </Link>
+                  </td>
+                  <td>
+                    {isEditing ? (
+                      <select
+                        name="status"
+                        value={editData.status}
+                        onChange={handleEditChange}
+                        required
+                      >
+                        <option value="">--Select--</option>
+                        <option value="WATCHING">Watching</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="ON_HOLD">On Hold</option>
+                        <option value="PLAN_TO_WATCH">Plan to Watch</option>
+                        <option value="DROPPED">Dropped</option>
+                      </select>
+                    ) : (
+                      rec.status || 'N/A'
+                    )}
+                  </td>
+                  <td>
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        name="rating"
+                        step="0.1"
+                        min="0"
+                        max="10"
+                        value={editData.rating}
+                        onChange={handleEditChange}
+                        placeholder="0 - 10"
+                      />
+                    ) : (
+                      rec.rating ?? 'Not rated'
+                    )}
+                  </td>
+                  <td>
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        name="episodesWatched"
+                        min="0"
+                        value={editData.episodesWatched}
+                        onChange={handleEditChange}
+                        placeholder="0"
+                      />
+                    ) : (
+                      rec.episodesWatched ?? 'N/A'
+                    )}
+                  </td>
+                  <td>
+                    {isEditing ? (
+                      <>
+                        <button onClick={() => handleSave(rec.id)}>Save</button>
+                        <button onClick={handleCancelEdit} style={{ marginLeft: '0.5em' }}>Cancel</button>
+                      </>
+                    ) : (
+                      <button onClick={() => handleEditClick(rec)}>Edit</button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       )}
+
+      <div style={{ marginTop: '1em' }}>
+        <Link to="/anime">Back to Anime List</Link>
+      </div>
     </div>
   );
 };
