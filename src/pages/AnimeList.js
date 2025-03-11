@@ -33,9 +33,10 @@ const AnimeList = () => {
       <h1>Anime List</h1>
       <ul>
         {animeList.map(anime => (
-          <li key={anime.animeId}>
-            {/* Wrap anime name in Link so users can navigate to details page */}
-            <Link to={`/anime/${anime.animeId}`}>
+          // Use malId as the key and in the link since malId is now the primary key
+          <li key={anime.malId}>
+            {/* Wrap anime name in Link so users can navigate to details page using malId */}
+            <Link to={`/anime/${anime.malId}`}>
               <h2>{anime.name}</h2>
             </Link>
             <p>Type: {anime.type}</p>

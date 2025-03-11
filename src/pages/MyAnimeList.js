@@ -147,10 +147,10 @@ const MyAnimeList = () => {
           <thead>
             <tr style={{ borderBottom: '2px solid #ccc' }}>
               <th style={{ textAlign: 'left' }}>#</th>
-              <th style={{ textAlign: 'left' }}>Anime ID</th>
+              <th style={{ textAlign: 'left' }}>MAL ID</th>
               <th style={{ textAlign: 'left' }}>Status</th>
               <th style={{ textAlign: 'left' }}>Rating</th>
-              <th style={{ textAlign: 'left' }}>Episodes</th>
+              <th style={{ textAlign: 'left' }}>Episodes Watched</th>
               <th style={{ textAlign: 'left' }}>Actions</th>
             </tr>
           </thead>
@@ -161,8 +161,8 @@ const MyAnimeList = () => {
                 <tr key={rec.id} style={{ borderBottom: '1px solid #ccc' }}>
                   <td>{idx + 1}</td>
                   <td>
-                    <Link to={`/anime/${rec.animeId}`}>
-                      {rec.animeId}
+                    <Link to={`/anime/${rec.malId}`}>
+                      {rec.malId}
                     </Link>
                   </td>
                   <td>

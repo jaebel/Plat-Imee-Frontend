@@ -1,10 +1,10 @@
-// AnimeDetails.js
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
 
 const AnimeDetails = () => {
+  // Retrieve the anime id from the URL (this is now the MAL ID)
   const { id } = useParams();
   const [anime, setAnime] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -33,10 +33,10 @@ const AnimeDetails = () => {
         setButtonText('Not logged in');
         return;
       }
-      // Make a POST request with the correct userId and animeId
+      // Make a POST request with the correct userId and MAL ID (malId)
       await axiosInstance.post('/user-anime', {
         userId: user.userId,
-        animeId: anime.animeId
+        malId: anime.malId  // Use malId instead of animeId
       });
       setButtonText('Added');
     } catch (error) {
