@@ -2,11 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
+import JikanService from '../services/JikanService';
 
 const AnimeDetails = () => {
   // Retrieve the anime id from the URL (this is now the MAL ID)
   const { id } = useParams();
   const [anime, setAnime] = useState(null);
+  const [jikanData, setJikanData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [buttonText, setButtonText] = useState('Add to My List');
@@ -26,6 +28,19 @@ const AnimeDetails = () => {
         setLoading(false);
       });
   }, [id]);
+
+  // Fetch additional details from Jikan using the MAL ID without affecting existing code.
+  useEffect(() => {
+    if (anime && anime.malId) {
+      JikanService.getAnimeDetails(anime.malId)
+        .then(data => {
+          setJikanData(data);
+        })
+        .catch(err => {
+          console.error('Error fetching external data from Jikan:', err);
+        });
+    }
+  }, [anime]);
 
   const handleAddToList = async () => {
     try {
@@ -60,6 +75,17 @@ const AnimeDetails = () => {
       <p>Premiered: {anime.premiered}</p>
       {anime.englishName && <p>English Name: {anime.englishName}</p>}
       {anime.japaneseName && <p>Japanese Name: {anime.japaneseName}</p>}
+
+      {/* Display additional details from Jikan if available */}
+      {jikanData && (
+        <div>
+          <h2>Additional Info from Jikan</h2>
+          {jikanData.images && jikanData.images.jpg && (
+            <img src={jikanData.images.jpg.image_url} alt="Anime" style={{ width: '200px' }} />
+          )}
+          <p><strong>Synopsis:</strong> {jikanData.synopsis}</p>
+        </div>
+      )}
 
       <button onClick={handleAddToList}>{buttonText}</button>
 
