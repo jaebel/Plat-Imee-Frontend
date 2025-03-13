@@ -10,6 +10,7 @@ import Profile from './pages/Profile';
 import AnimeList from './pages/AnimeList';
 import AnimeDetails from './pages/AnimeDetails';
 import MyAnimeList from './pages/MyAnimeList';
+import SearchAnime from './pages/SearchAnime';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/search" element={<SearchAnime />} />
           
           {/* Protected routes */}
           <Route 
