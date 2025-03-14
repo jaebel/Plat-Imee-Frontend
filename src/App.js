@@ -11,6 +11,7 @@ import AnimeList from './pages/AnimeList';
 import AnimeDetails from './pages/AnimeDetails';
 import MyAnimeList from './pages/MyAnimeList';
 import SearchAnime from './pages/SearchAnime';
+import TopAnime from './pages/TopAnime';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
           <Route path="/search" element={<SearchAnime />} />
+          <Route path="/top" element={<TopAnime />} />
           
           {/* Protected routes */}
           <Route 
