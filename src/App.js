@@ -13,6 +13,7 @@ import MyAnimeList from './pages/MyAnimeList';
 import SearchAnime from './pages/SearchAnime';
 import TopAnime from './pages/TopAnime';
 import BrowseByGenre from './pages/BrowseByGenre';
+import EditProfile from './pages/EditProfile';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="/search" element={<SearchAnime />} />
           <Route path="/top" element={<TopAnime />} />
           <Route path="/browse-genre" element={<BrowseByGenre />} />
+          <Route path="/edit-profile" element={<EditProfile />} />
           
           {/* Protected routes */}
           <Route 
