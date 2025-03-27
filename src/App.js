@@ -14,6 +14,7 @@ import SearchAnime from './pages/SearchAnime';
 import TopAnime from './pages/TopAnime';
 import BrowseByGenre from './pages/BrowseByGenre';
 import EditProfile from './pages/EditProfile';
+import Recommendations from './pages/Recommendations';
 
 function App() {
   return (
@@ -54,6 +55,14 @@ function App() {
                 <MyAnimeList />
               </PrivateRoute>
             } 
+          />
+          <Route 
+            path="/recommendations" 
+            element={
+              <PrivateRoute>
+                <Recommendations />
+              </PrivateRoute>
+            }
           />
           
           <Route path="/anime/:id" element={<AnimeDetails />} />
