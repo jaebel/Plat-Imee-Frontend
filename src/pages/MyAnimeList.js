@@ -3,7 +3,6 @@ import { AuthContext } from '../context/AuthContext';
 import axiosInstance from '../api/axiosInstance';
 import { Link } from 'react-router-dom';
 
-// Define the various status tabs
 const TABS = [
   { label: 'All Anime', value: 'ALL' },
   { label: 'Currently Watching', value: 'WATCHING' },
@@ -18,6 +17,7 @@ const MyAnimeList = () => {
 
   // All user-anime records
   const [records, setRecords] = useState([]);
+  const [animeNames, setAnimeNames] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -41,8 +41,23 @@ const MyAnimeList = () => {
     }
 
     axiosInstance.get(`/user-anime?userId=${user.userId}`)
-      .then(res => {
-        setRecords(res.data);
+      .then(async res => {
+        const userRecords = res.data;
+        setRecords(userRecords);
+
+        const malIds = [...new Set(userRecords.map(r => r.malId))];
+        const nameMap = {};
+
+        await Promise.all(malIds.map(async (malId) => {
+          try {
+            const response = await axiosInstance.get(`/anime/${malId}`);
+            nameMap[malId] = response.data.name || 'Unknown Title';
+          } catch {
+            nameMap[malId] = 'Unknown Title';
+          }
+        }));
+
+        setAnimeNames(nameMap);
         setLoading(false);
       })
       .catch(err => {
@@ -102,9 +117,8 @@ const MyAnimeList = () => {
 
   // Delete a record via DELETE
   const handleDelete = (recordId) => {
-    if (!window.confirm('Are you sure you want to remove this anime from your list?')) {
-      return;
-    }
+    if (!window.confirm('Are you sure you want to remove this anime from your list?')) return;
+
     axiosInstance.delete(`/user-anime/${recordId}`)
       .then(() => {
         // Remove it from local state
@@ -114,6 +128,12 @@ const MyAnimeList = () => {
         console.error('Error deleting record:', err);
         alert('Failed to delete record.');
       });
+  };
+
+  const handleRowClick = (e, record) => {
+    const tag = e.target.tagName.toLowerCase();
+    if (tag === 'button' || tag === 'a' || editingId === record.id) return;
+    handleEditClick(record);
   };
 
   if (loading) return <div>Loading your anime list...</div>;
@@ -143,34 +163,47 @@ const MyAnimeList = () => {
       {filteredRecords.length === 0 ? (
         <p>No anime found in this category.</p>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
           <thead>
             <tr style={{ borderBottom: '2px solid #ccc' }}>
-              <th style={{ textAlign: 'left' }}>#</th>
-              <th style={{ textAlign: 'left' }}>MAL ID</th>
-              <th style={{ textAlign: 'left' }}>Status</th>
-              <th style={{ textAlign: 'left' }}>Rating</th>
-              <th style={{ textAlign: 'left' }}>Episodes Watched</th>
-              <th style={{ textAlign: 'left' }}>Actions</th>
+              {['#', 'MAL ID', 'Anime Name', 'Status', 'Rating', 'Episodes Watched', 'Actions'].map((heading, i) => (
+                <th
+                  key={i}
+                  style={{
+                    textAlign: 'left',
+                    padding: '0.5em',
+                    verticalAlign: 'top',
+                    wordWrap: 'break-word'
+                  }}
+                >
+                  {heading}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {filteredRecords.map((rec, idx) => {
               const isEditing = editingId === rec.id;
               return (
-                <tr key={rec.id} style={{ borderBottom: '1px solid #ccc' }}>
-                  <td>{idx + 1}</td>
-                  <td>
-                    <Link to={`/anime/${rec.malId}`}>
+                <tr
+                  key={rec.id}
+                  style={{ borderBottom: '1px solid #ccc', cursor: 'pointer' }}
+                  onClick={(e) => handleRowClick(e, rec)}
+                >
+                  <td style={{ padding: '0.5em' }}>{idx + 1}</td>
+                  <td style={{ padding: '0.5em' }}>
+                    <Link to={`/anime/${rec.malId}`} onClick={(e) => e.stopPropagation()}>
                       {rec.malId}
                     </Link>
                   </td>
-                  <td>
+                  <td style={{ padding: '0.5em' }}>{animeNames[rec.malId] || 'Unknown Title'}</td>
+                  <td style={{ padding: '0.5em' }}>
                     {isEditing ? (
                       <select
                         name="status"
                         value={editData.status}
                         onChange={handleEditChange}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSave(rec.id)}
                         required
                       >
                         <option value="">--Select--</option>
@@ -184,7 +217,7 @@ const MyAnimeList = () => {
                       rec.status || 'N/A'
                     )}
                   </td>
-                  <td>
+                  <td style={{ padding: '0.5em' }}>
                     {isEditing ? (
                       <input
                         type="number"
@@ -194,13 +227,14 @@ const MyAnimeList = () => {
                         max="10"
                         value={editData.rating}
                         onChange={handleEditChange}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSave(rec.id)}
                         placeholder="0 - 10"
                       />
                     ) : (
                       rec.rating ?? 'Not rated'
                     )}
                   </td>
-                  <td>
+                  <td style={{ padding: '0.5em' }}>
                     {isEditing ? (
                       <input
                         type="number"
@@ -208,23 +242,29 @@ const MyAnimeList = () => {
                         min="0"
                         value={editData.episodesWatched}
                         onChange={handleEditChange}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSave(rec.id)}
                         placeholder="0"
                       />
                     ) : (
                       rec.episodesWatched ?? 'N/A'
                     )}
                   </td>
-                  <td>
+                  <td style={{ padding: '0.5em' }}>
                     {isEditing ? (
                       <>
                         <button onClick={() => handleSave(rec.id)}>Save</button>
-                        <button onClick={handleCancelEdit} style={{ marginLeft: '0.5em' }}>Cancel</button>
+                        <button onClick={handleCancelEdit} style={{ marginLeft: '0.5em' }}>
+                          Cancel
+                        </button>
                       </>
                     ) : (
                       <>
-                        <button onClick={() => handleEditClick(rec)}>Edit</button>
+                        <button onClick={(e) => { e.stopPropagation(); handleEditClick(rec); }}>Edit</button>
                         <button
-                          onClick={() => handleDelete(rec.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(rec.id);
+                          }}
                           style={{ marginLeft: '0.5em', color: 'red' }}
                         >
                           Delete
@@ -238,10 +278,6 @@ const MyAnimeList = () => {
           </tbody>
         </table>
       )}
-
-      <div style={{ marginTop: '1em' }}>
-        <Link to="/anime">Back to Anime List</Link>
-      </div>
     </div>
   );
 };

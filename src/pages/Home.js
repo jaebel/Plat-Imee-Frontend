@@ -1,35 +1,66 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Home = () => {
-  // Local state for the search input
-  const [searchText, setSearchText] = useState('');
-  // Allows programmatic navigation
-  const navigate = useNavigate();
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (searchText.trim()) {
-      // Redirect to /search?query=someSearchTerm
-      navigate(`/search?query=${encodeURIComponent(searchText.trim())}`);
-    }
-  };
-
   return (
-    <div style={{ padding: '1em' }}>
-      <h1>Welcome to Plat-Imee</h1>
-      <p>Your personal anime discovery and recommendation platform.</p>
-      
-      {/* Basic search form */}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Search anime..."
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-        />
-        <button type="submit">Search</button>
-      </form>
+    <div style={{
+      padding: '2em',
+      textAlign: 'center',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '2em'
+    }}>
+      <div>
+        <h1>Welcome to Plat-Imee</h1>
+        <p>Your personal anime discovery and recommendation platform.</p>
+      </div>
+
+      <div style={{
+        display: 'flex',
+        gap: '2em',
+        flexWrap: 'wrap',
+        justifyContent: 'center'
+      }}>
+        <Link to="/top" style={{
+          padding: '1em 2em',
+          backgroundColor: '#333',
+          color: '#fff',
+          textDecoration: 'none',
+          fontSize: '1.1em',
+          borderRadius: '8px',
+          minWidth: '180px',
+          textAlign: 'center'
+        }}>
+          Top Anime
+        </Link>
+
+        <Link to="/browse-genre" style={{
+          padding: '1em 2em',
+          backgroundColor: '#333',
+          color: '#fff',
+          textDecoration: 'none',
+          fontSize: '1.1em',
+          borderRadius: '8px',
+          minWidth: '180px',
+          textAlign: 'center'
+        }}>
+          Browse by Genre
+        </Link>
+
+        <Link to="/all-anime" style={{
+          padding: '1em 2em',
+          backgroundColor: '#333',
+          color: '#fff',
+          textDecoration: 'none',
+          fontSize: '1.1em',
+          borderRadius: '8px',
+          minWidth: '180px',
+          textAlign: 'center'
+        }}>
+          All Anime
+        </Link>
+      </div>
     </div>
   );
 };
