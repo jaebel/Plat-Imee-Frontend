@@ -4,7 +4,6 @@ import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 
-// Helper to map Jikan's "type" to your enum
 function mapJikanType(jikanType) {
   if (!jikanType) return "TV";
   const upper = jikanType.toUpperCase();
@@ -20,8 +19,6 @@ function mapJikanType(jikanType) {
   }
 }
 
-// A simple mapping from Jikan's known genre IDs to their names
-// For example, 1 = Action, 2 = Adventure, etc.
 const JIKAN_GENRE_OPTIONS = [
   { id: 1, name: "Action" },
   { id: 2, name: "Adventure" },
@@ -33,20 +30,18 @@ const JIKAN_GENRE_OPTIONS = [
   { id: 22, name: "Romance" },
   { id: 24, name: "Sci-Fi" },
   { id: 30, name: "Sports" },
-  // ... add more if you like
 ];
 
 const BrowseByGenre = () => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
-  // State for selected genres, results, loading, error
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [messages, setMessages] = useState({});
 
-  // Toggle genre in or out of selectedGenres
   const handleGenreChange = (genreId) => {
     if (selectedGenres.includes(genreId)) {
       setSelectedGenres(selectedGenres.filter(id => id !== genreId));
@@ -55,18 +50,17 @@ const BrowseByGenre = () => {
     }
   };
 
-  // Build the query param and fetch from Jikan
   const handleSearch = async () => {
     if (selectedGenres.length === 0) {
-      alert('Please select at least one genre.');
+      setError('Please select at least one genre.');
       return;
     }
+
     setLoading(true);
     setError('');
+    setMessages({});
 
     try {
-      // Jikan's advanced search can accept multiple genres as a comma-separated list
-      // e.g., ?genres=1,2 for Action+Adventure
       const genreString = selectedGenres.join(",");
       const response = await axios.get(
         `https://api.jikan.moe/v4/anime?genres=${genreString}`
@@ -81,20 +75,26 @@ const BrowseByGenre = () => {
   };
 
   const handleAddToMyList = async (malId) => {
+    const newMessages = { ...messages };
+
     if (!user || !user.userId) {
-      alert('Please log in first!');
+      newMessages[malId] = 'You must be logged in to add anime to your list.';
+      setMessages(newMessages);
       return;
     }
+
     try {
       await axiosInstance.post('/user-anime', {
         userId: user.userId,
         malId: malId
       });
-      alert('Anime added to your list!');
+      newMessages[malId] = 'Anime added to your list!';
     } catch (err) {
       console.error('Error adding anime:', err);
-      alert('Failed to add anime.');
+      newMessages[malId] = 'Failed to add anime.';
     }
+
+    setMessages(newMessages);
   };
 
   const handleViewDetails = async (item) => {
@@ -105,7 +105,7 @@ const BrowseByGenre = () => {
       if (err.response && err.response.status === 404) {
         try {
           const jikanType = mapJikanType(item.type);
-          const minimalGenres = []; // or parse if you want local genre IDs
+          const minimalGenres = [];
           const payload = {
             malId: malId,
             name: item.title_english || item.title,
@@ -119,12 +119,12 @@ const BrowseByGenre = () => {
           await axiosInstance.post('/anime', payload);
         } catch (createErr) {
           console.error('Error creating anime record:', createErr);
-          alert('Failed to create local record for this anime.');
+          setError('Failed to create local record for this anime.');
           return;
         }
       } else {
         console.error('Error checking local anime record:', err);
-        alert('Error checking local anime record.');
+        setError('Error checking local anime record.');
         return;
       }
     }
@@ -162,18 +162,39 @@ const BrowseByGenre = () => {
             {results.map(item => (
               <li
                 key={item.mal_id}
-                style={{ marginBottom: '1em', borderBottom: '1px solid #ccc', paddingBottom: '1em' }}
+                style={{
+                  marginBottom: '1em',
+                  borderBottom: '1px solid #ccc',
+                  paddingBottom: '1em'
+                }}
               >
                 <h3>{item.title_english || item.title}</h3>
                 {item.images?.jpg?.image_url && (
-                  <img src={item.images.jpg.image_url} alt="Anime Poster" style={{ width: '150px' }} />
+                  <img
+                    src={item.images.jpg.image_url}
+                    alt="Anime Poster"
+                    style={{ width: '150px' }}
+                  />
                 )}
-                {item.synopsis && (
-                  <p><strong>Synopsis:</strong> {item.synopsis}</p>
+
+                <p><strong>Type:</strong> {item.type || 'TV'}</p>
+                <p><strong>Aired:</strong> {item.aired?.string || 'Unknown'}</p>
+                <p><strong>Rating:</strong> {item.score !== null ? item.score : 'N/A'}</p>
+
+                {messages[item.mal_id] && (
+                  <p style={{
+                    color: messages[item.mal_id].includes('added') ? 'green' : 'red',
+                    marginBottom: '0.5em'
+                  }}>
+                    {messages[item.mal_id]}
+                  </p>
                 )}
 
                 <button onClick={() => handleAddToMyList(item.mal_id)}>Add to My List</button>
-                <button style={{ marginLeft: '0.5em' }} onClick={() => handleViewDetails(item)}>
+                <button
+                  style={{ marginLeft: '0.5em' }}
+                  onClick={() => handleViewDetails(item)}
+                >
                   View Details
                 </button>
               </li>

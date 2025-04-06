@@ -14,6 +14,7 @@ const Navbar = () => {
         {token ? (
           <>
             <li><Link to="/profile">Profile</Link></li>
+            <li><Link to="/recommendations">recommendations</Link></li>
             <li>
               <button onClick={logout} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                 Logout
@@ -24,6 +25,8 @@ const Navbar = () => {
           <>
             <li><Link to="/signup">Sign Up</Link></li>
             <li><Link to="/login">Login</Link></li>
+            <li><Link to="/browse-genre">browse by genre</Link></li>
+            <li><Link to="/all-anime">all anime</Link></li>
           </>
         )}
       </ul>

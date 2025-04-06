@@ -15,6 +15,7 @@ import TopAnime from './pages/TopAnime';
 import BrowseByGenre from './pages/BrowseByGenre';
 import EditProfile from './pages/EditProfile';
 import Recommendations from './pages/Recommendations';
+import AllAnime from './pages/AllAnime';
 
 function App() {
   return (
@@ -30,6 +31,8 @@ function App() {
           <Route path="/top" element={<TopAnime />} />
           <Route path="/browse-genre" element={<BrowseByGenre />} />
           <Route path="/edit-profile" element={<EditProfile />} />
+          <Route path="/anime" element={<AnimeList />} />
+          <Route path="/all-anime" element={<AllAnime />} />
           
           {/* Protected routes */}
           <Route 
@@ -37,14 +40,6 @@ function App() {
             element={
               <PrivateRoute>
                 <Profile />
-              </PrivateRoute>
-            } 
-          />
-          <Route 
-            path="/anime" 
-            element={
-              <PrivateRoute>
-                <AnimeList />
               </PrivateRoute>
             } 
           />

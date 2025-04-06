@@ -1,16 +1,3 @@
-// import React from 'react';
-
-// const Home = () => {
-//   return (
-//     <div>
-//       <h1>Welcome to Plat-Imee</h1>
-//       <p>Your personal anime discovery and recommendation platform.</p>
-//     </div>
-//   );
-// };
-
-// export default Home;
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -43,13 +30,6 @@ const Home = () => {
         />
         <button type="submit">Search</button>
       </form>
-      
-      {/* You can add other links here, like top rated anime, or anything else later */}
-      <div style={{ marginTop: '2em' }}>
-        <a href="https://myanimelist.net/" target="_blank" rel="noopener noreferrer">
-          Visit MyAnimeList
-        </a>
-      </div>
     </div>
   );
 };

@@ -12,6 +12,7 @@ const AnimeDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [buttonText, setButtonText] = useState('Add to My List');
+  const [showLoginMessage, setShowLoginMessage] = useState(false);
 
   // Pull the user from AuthContext, so we can get the correct userId
   const { user } = useContext(AuthContext);
@@ -43,12 +44,12 @@ const AnimeDetails = () => {
   }, [anime]);
 
   const handleAddToList = async () => {
+    if (!user || !user.userId) {
+      setShowLoginMessage(true);
+      return;
+    }
+
     try {
-      if (!user || !user.userId) {
-        setButtonText('Not logged in');
-        return;
-      }
-      // Make a POST request with the correct userId and MAL ID (malId)
       await axiosInstance.post('/user-anime', {
         userId: user.userId,
         malId: anime.malId  // Use malId instead of animeId
@@ -87,11 +88,19 @@ const AnimeDetails = () => {
         </div>
       )}
 
+      {showLoginMessage && (
+        <p style={{ color: 'red', marginBottom: '10px' }}>
+          You must be logged in to add anime to your list.
+        </p>
+      )}
+
       <button onClick={handleAddToList}>{buttonText}</button>
 
-      <Link to="/anime" style={{ marginTop: '20px', display: 'inline-block' }}>
-        Back to Anime List
-      </Link>
+      {user && (
+        <Link to="/anime" style={{ marginTop: '20px', display: 'inline-block' }}>
+          Back to Anime List
+        </Link>
+      )}
     </div>
   );
 };
