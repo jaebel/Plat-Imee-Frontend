@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
 import JikanService from '../services/JikanService';
@@ -95,12 +95,6 @@ const AnimeDetails = () => {
       )}
 
       <button onClick={handleAddToList}>{buttonText}</button>
-
-      {user && (
-        <Link to="/anime" style={{ marginTop: '20px', display: 'inline-block' }}>
-          Back to Anime List
-        </Link>
-      )}
     </div>
   );
 };

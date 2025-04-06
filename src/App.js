@@ -16,6 +16,7 @@ import BrowseByGenre from './pages/BrowseByGenre';
 import EditProfile from './pages/EditProfile';
 import Recommendations from './pages/Recommendations';
 import AllAnime from './pages/AllAnime';
+import UpcomingAnime from './pages/UpcomingAnime'; // ✅ Import added
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/search" element={<SearchAnime />} />
           <Route path="/top" element={<TopAnime />} />
+          <Route path="/upcoming" element={<UpcomingAnime />} />
           <Route path="/browse-genre" element={<BrowseByGenre />} />
           <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/anime" element={<AnimeList />} />

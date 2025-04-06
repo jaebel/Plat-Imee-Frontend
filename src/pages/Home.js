@@ -60,6 +60,19 @@ const Home = () => {
         }}>
           All Anime
         </Link>
+
+        <Link to="/upcoming" style={{
+          padding: '1em 2em',
+          backgroundColor: '#333',
+          color: '#fff',
+          textDecoration: 'none',
+          fontSize: '1.1em',
+          borderRadius: '8px',
+          minWidth: '180px',
+          textAlign: 'center'
+        }}>
+          Upcoming Anime
+        </Link>
       </div>
     </div>
   );

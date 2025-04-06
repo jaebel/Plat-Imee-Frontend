@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 const Profile = () => {
   const { token } = useContext(AuthContext);
@@ -11,7 +12,6 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // Call the new endpoint
         const response = await axiosInstance.get('/users/me');
         setProfile(response.data);
       } catch (err) {
@@ -34,7 +34,7 @@ const Profile = () => {
   if (error) return <div style={{ color: 'red' }}>{error}</div>;
 
   return (
-    <div>
+    <div style={{ padding: '1em' }}>
       <h1>Profile</h1>
       {profile ? (
         <div>
@@ -42,6 +42,11 @@ const Profile = () => {
           <p><strong>Email:</strong> {profile.email}</p>
           <p><strong>First Name:</strong> {profile.first_name}</p>
           <p><strong>Last Name:</strong> {profile.last_name}</p>
+
+          {/* Edit Profile Button */}
+          <div style={{ marginTop: '1em' }}>
+            <Link to="/edit-profile">Edit Profile</Link>
+          </div>
         </div>
       ) : (
         <p>No profile data available.</p>

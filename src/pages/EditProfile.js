@@ -66,7 +66,6 @@ const EditProfile = () => {
     try {
       // Build payload; include password only if the field is non-empty
       const payload = {
-        username: form.username,
         email: form.email,
         firstName: form.firstName,
         lastName: form.lastName,
@@ -97,17 +96,10 @@ const EditProfile = () => {
       <h1>Edit Profile</h1>
       {success && <div style={{ color: 'green' }}>{success}</div>}
       <form onSubmit={handleSubmit}>
-        {/* Username Field */}
+        {/* Username Field (read-only display only) */}
         <div style={{ marginBottom: '1em' }}>
           <label htmlFor="username"><strong>Username:</strong></label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={form.username}
-            onChange={handleChange}
-            required
-          />
+          <div id="username">{form.username}</div>
         </div>
         {/* Email Field */}
         <div style={{ marginBottom: '1em' }}>
