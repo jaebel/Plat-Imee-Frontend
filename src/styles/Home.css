@@ -1,0 +1,84 @@
+.home-container {
+    padding: 2em;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2em;
+}
+
+.home-heading h1 {
+    margin: 0;
+}
+
+.home-buttons {
+    display: flex;
+    gap: 2em;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.home-button {
+    padding: 1em 2em;
+    background-color: #333;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.1em;
+    border-radius: 8px;
+    min-width: 180px;
+    text-align: center;
+}
+
+/* Trending section */
+.trending-section {
+    width: 100%;
+    max-width: 1200px;
+    margin: 2em auto 0;
+}
+
+.trending-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
+    padding: 0 0.5em;
+}
+
+.trending-header h2 {
+    margin: 0;
+    font-size: 1.4em;
+    text-align: left;
+}
+
+.trending-header a {
+    text-decoration: none;
+    font-weight: bold;
+    color: #000;
+    font-size: 0.9em;
+}
+
+.trending-anime-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5em;
+    justify-content: flex-start;
+    padding: 0 0.5em;
+}
+
+.anime-card {
+    width: 11em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.anime-image {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.anime-title {
+    margin-top: 0.5em;
+    font-size: 0.9em;
+    text-align: center;
+}
