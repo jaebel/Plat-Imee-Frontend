@@ -1,24 +1,9 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import axiosInstance from '../api/axiosInstance';
 import '../styles/Home.css';
 import { AuthContext } from '../context/AuthContext';
-
-function mapJikanType(jikanType) {
-  if (!jikanType) return "TV";
-  const upper = jikanType.toUpperCase();
-  switch (upper) {
-    case "TV":
-    case "MOVIE":
-    case "OVA":
-    case "ONA":
-    case "SPECIAL":
-      return upper;
-    default:
-      return "TV";
-  }
-}
+import { handleViewDetails } from '../utils/handleViewDetails';
 
 const Home = () => {
   const [seasonalAnime, setSeasonalAnime] = useState([]);
@@ -32,41 +17,6 @@ const Home = () => {
       })
       .catch(err => console.error('Failed to fetch seasonal anime:', err));
   }, []);
-
-  const handleViewDetails = async (anime) => {
-    const malId = anime.mal_id;
-    try {
-      await axiosInstance.get(`/anime/${malId}`);
-    } catch (err) {
-      if (err.response && err.response.status === 404) {
-        try {
-          const jikanType = mapJikanType(anime.type);
-          const minimalGenres = [];
-
-          const payload = {
-            malId: malId,
-            name: anime.title_english || anime.title,
-            type: jikanType,
-            episodes: anime.episodes || 1,
-            score: anime.score || 0.0,
-            aired: anime.aired?.string || "",
-            premiered: anime.season || "",
-            genres: minimalGenres
-          };
-          await axiosInstance.post('/anime', payload);
-        } catch (createErr) {
-          console.error('Error creating anime record:', createErr);
-          alert('Failed to create local record for this anime.');
-          return;
-        }
-      } else {
-        console.error('Error checking local anime record:', err);
-        alert('Error checking local anime record.');
-        return;
-      }
-    }
-    navigate(`/anime/${malId}`);
-  };
 
   return (
     <div className="home-container">
@@ -84,7 +34,9 @@ const Home = () => {
 
       <div className="trending-section">
         <div className="trending-header">
-          <h2><button onClick={() => navigate('/seasonal')} className="trending-link">Trending This Season</button></h2>
+          <h2>
+            <span className="trending-link" onClick={() => navigate('/seasonal')}>Trending This Season</span>
+          </h2>
         </div>
         <div className="trending-anime-list">
           {seasonalAnime.map(anime => (
@@ -93,12 +45,12 @@ const Home = () => {
                 src={anime.images?.jpg?.image_url}
                 alt={anime.title}
                 className="anime-image"
-                onClick={() => handleViewDetails(anime)}
+                onClick={() => handleViewDetails(anime, navigate)}
                 style={{ cursor: 'pointer' }}
               />
               <p
                 className="anime-title"
-                onClick={() => handleViewDetails(anime)}
+                onClick={() => handleViewDetails(anime, navigate)}
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
               >
                 {anime.title_english || anime.title}

@@ -2,22 +2,8 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
-import { useNavigate} from 'react-router-dom';
-
-function mapJikanType(jikanType) {
-  if (!jikanType) return "TV";
-  const upper = jikanType.toUpperCase();
-  switch (upper) {
-    case "TV":
-    case "MOVIE":
-    case "OVA":
-    case "ONA":
-    case "SPECIAL":
-      return upper;
-    default:
-      return "TV";
-  }
-}
+import { useNavigate } from 'react-router-dom';
+import { handleViewDetails } from '../utils/handleViewDetails';
 
 const JIKAN_GENRE_OPTIONS = [
   { id: 1, name: "Action" },
@@ -163,40 +149,6 @@ const BrowseByGenre = () => {
     setMessages(newMessages);
   };
 
-  const handleViewDetails = async (item) => {
-    const malId = item.mal_id;
-    try {
-      await axiosInstance.get(`/anime/${malId}`);
-    } catch (err) {
-      if (err.response && err.response.status === 404) {
-        try {
-          const jikanType = mapJikanType(item.type);
-          const minimalGenres = [];
-          const payload = {
-            malId: malId,
-            name: item.title_english || item.title,
-            type: jikanType,
-            episodes: item.episodes || 1,
-            score: item.score || 0.0,
-            aired: item.aired?.string || "",
-            premiered: item.season || "",
-            genres: minimalGenres
-          };
-          await axiosInstance.post('/anime', payload);
-        } catch (createErr) {
-          console.error('Error creating anime record:', createErr);
-          setError('Failed to create local record for this anime.');
-          return;
-        }
-      } else {
-        console.error('Error checking local anime record:', err);
-        setError('Error checking local anime record.');
-        return;
-      }
-    }
-    navigate(`/anime/${malId}`);
-  };
-
   return (
     <div style={{ padding: '1em' }}>
       <h1>Browse Anime by Genre</h1>
@@ -239,7 +191,8 @@ const BrowseByGenre = () => {
                   <img
                     src={item.images.jpg.image_url}
                     alt="Anime Poster"
-                    style={{ width: '150px' }}
+                    style={{ width: '150px', cursor: 'pointer' }}
+                    onClick={() => handleViewDetails(item, navigate)}
                   />
                 )}
 
@@ -259,7 +212,7 @@ const BrowseByGenre = () => {
                 <button onClick={() => handleAddToMyList(item.mal_id)}>Add to My List</button>
                 <button
                   style={{ marginLeft: '0.5em' }}
-                  onClick={() => handleViewDetails(item)}
+                  onClick={() => handleViewDetails(item, navigate)}
                 >
                   View Details
                 </button>

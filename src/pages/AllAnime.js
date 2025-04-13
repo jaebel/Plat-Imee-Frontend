@@ -3,6 +3,7 @@ import axios from 'axios';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { handleViewDetails } from '../utils/handleViewDetails';
 
 const AllAnime = () => {
   const { user } = useContext(AuthContext);
@@ -55,10 +56,6 @@ const AllAnime = () => {
     setMessages(newMessages);
   };
 
-  const handleViewDetails = (malId) => {
-    navigate(`/anime/${malId}`);
-  };
-
   return (
     <div style={{ padding: '1em' }}>
       <h1>All Anime</h1>
@@ -83,7 +80,8 @@ const AllAnime = () => {
                 <img
                   src={item.images.jpg.image_url}
                   alt="Anime Poster"
-                  style={{ width: '150px' }}
+                  style={{ width: '150px', cursor: 'pointer' }}
+                  onClick={() => handleViewDetails(item, navigate)}
                 />
               )}
               <p><strong>Type:</strong> {item.type || 'TV'}</p>
@@ -100,7 +98,7 @@ const AllAnime = () => {
               )}
 
               <button onClick={() => handleAddToMyList(item.mal_id)}>Add to My List</button>
-              <button style={{ marginLeft: '0.5em' }} onClick={() => handleViewDetails(item.mal_id)}>
+              <button style={{ marginLeft: '0.5em' }} onClick={() => handleViewDetails(item, navigate)}>
                 View Details
               </button>
             </li>

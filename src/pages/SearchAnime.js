@@ -3,47 +3,20 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
+import { handleViewDetails } from '../utils/handleViewDetails';
 
-/**
- * Optional helper to map Jikan's "type" string to your AnimeType enum strings:
- *  TV, MOVIE, OVA, ONA, SPECIAL
- */
-function mapJikanType(jikanType) {
-  if (!jikanType) return "TV"; // fallback if missing
-  const upper = jikanType.toUpperCase();
-  switch (upper) {
-    case "TV":
-    case "MOVIE":
-    case "OVA":
-    case "ONA":
-    case "SPECIAL":
-      return upper;
-    default:
-      return "TV"; // or "UNKNOWN" if your enum supports it
-  }
-}
-
-/**
- * SearchAnime - displays search results from Jikan for the user's query
- * Allows the user to "Add to My List" or "View Details."
- * When viewing details of a non-local anime, we create a minimal record
- */
 const SearchAnime = () => {
-  // Read the search query from the URL (e.g., /search?query=naruto)
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
   const query = params.get('query') || '';
 
-  // Local states for results, loading, error
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Access user from AuthContext for "Add to My List"
   const { user } = useContext(AuthContext);
 
-  // Fetch search results from Jikan whenever 'query' changes
   useEffect(() => {
     if (!query.trim()) return;
     setLoading(true);
@@ -61,9 +34,6 @@ const SearchAnime = () => {
       });
   }, [query]);
 
-  /**
-   * handleAddToMyList - user clicks "Add" to post to /user-anime with malId
-   */
   const handleAddToMyList = async (malId) => {
     if (!user || !user.userId) {
       alert('Please log in first!');
@@ -81,58 +51,6 @@ const SearchAnime = () => {
     }
   };
 
-  /**
-   * handleViewDetails - user clicks "View Details"
-   * 1) Check if local DB has the anime by malId (GET /anime/{malId})
-   * 2) If 404, create a minimal record with mandatory fields from Jikan
-   * 3) Redirect to /anime/{malId}
-   */
-  const handleViewDetails = async (item) => {
-    const malId = item.mal_id;
-    try {
-      // Check if anime exists locally
-      await axiosInstance.get(`/anime/${malId}`);
-      // If no error, it already exists
-    } catch (err) {
-      if (err.response && err.response.status === 404) {
-        // Not found locally, so create it
-        try {
-          // We map Jikan's fields to the required AnimeCreateDTO fields
-          // "type" must be non-null, so we convert Jikan's type to your enum-compatible string
-          // "genres" must be non-null, so pass an empty list or map them if you can
-          const jikanType = mapJikanType(item.type);
-          const minimalGenres = []; // or map Jikan's genres if you prefer
-
-          const payload = {
-            malId: malId,
-            name: item.title_english || item.title,
-            type: jikanType,
-            episodes: item.episodes || 1,  // fallback if missing
-            score: item.score || 0.0,      // fallback if missing
-            aired: item.aired?.string || "",
-            premiered: item.season || "",
-            // If your AnimeCreateDTO has "members", you can pass item.members if available
-            // or fallback to 0, e.g. "members: item.members || 0,"
-            genres: minimalGenres         // must not be null
-          };
-
-          await axiosInstance.post('/anime', payload);
-        } catch (createErr) {
-          console.error('Error creating anime record:', createErr);
-          alert('Failed to create local record for this anime.');
-          return;
-        }
-      } else {
-        console.error('Error checking local anime record:', err);
-        alert('Error checking local anime record.');
-        return;
-      }
-    }
-    // Now navigate to the local details page
-    navigate(`/anime/${malId}`);
-  };
-
-  // If no query, show a simple message
   if (!query.trim()) {
     return <div style={{ padding: '1em' }}>No search term provided.</div>;
   }
@@ -159,21 +77,24 @@ const SearchAnime = () => {
             >
               <h2>{item.title_english || item.title}</h2>
               {item.images?.jpg?.image_url && (
-                <img src={item.images.jpg.image_url} alt="Anime Poster" style={{ width: '150px' }} />
+                <img
+                  src={item.images.jpg.image_url}
+                  alt="Anime Poster"
+                  style={{ width: '150px', cursor: 'pointer' }}
+                  onClick={() => handleViewDetails(item, navigate)}
+                />
               )}
               {item.synopsis && (
                 <p><strong>Synopsis:</strong> {item.synopsis}</p>
               )}
 
-              {/* Add to My List calls your /user-anime endpoint */}
               <button onClick={() => handleAddToMyList(item.mal_id)}>
                 Add to My List
               </button>
 
-              {/* View Details attempts to create a local record if needed, then navigates */}
               <button
                 style={{ marginLeft: '0.5em' }}
-                onClick={() => handleViewDetails(item)}
+                onClick={() => handleViewDetails(item, navigate)}
               >
                 View Details
               </button>
