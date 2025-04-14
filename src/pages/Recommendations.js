@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { handleAddToList } from '../utils/handleAddToList';
 import { handleViewDetails } from '../utils/handleViewDetails';

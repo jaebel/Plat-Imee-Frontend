@@ -1,20 +1,33 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { handleViewDetails } from '../utils/handleViewDetails';
 import { handleAddToList } from '../utils/handleAddToList';
 
 const TopAnime = () => {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const params = new URLSearchParams(location.search);
+  const page = parseInt(params.get('page') || '1', 10);
+
   const [topAnime, setTopAnime] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [messages, setMessages] = useState({});
-  const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('https://api.jikan.moe/v4/top/anime')
+    // Scroll to top when component mounts or page changes
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [location.key]);
+
+  useEffect(() => {
+    setLoading(true);
+    setError('');
+
+    axios.get(`https://api.jikan.moe/v4/top/anime?page=${page}`)
       .then(res => {
         setTopAnime(res.data.data || []);
         setLoading(false);
@@ -24,7 +37,7 @@ const TopAnime = () => {
         setError('Failed to fetch top anime.');
         setLoading(false);
       });
-  }, []);
+  }, [page]);
 
   return (
     <div style={{ padding: '1em' }}>
@@ -73,6 +86,15 @@ const TopAnime = () => {
           </li>
         ))}
       </ul>
+
+      {/* Pagination Controls */}
+      <div style={{ marginTop: '2em' }}>
+        <button onClick={() => navigate(`?page=${page - 1}`)} disabled={page === 1}>
+          Previous
+        </button>
+        <span style={{ margin: '0 1em' }}>Page {page}</span>
+        <button onClick={() => navigate(`?page=${page + 1}`)}>Next</button>
+      </div>
     </div>
   );
 };

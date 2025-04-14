@@ -1,21 +1,31 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import axiosInstance from '../api/axiosInstance';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
 import { handleViewDetails } from '../utils/handleViewDetails';
+import { handleAddToList } from '../utils/handleAddToList';
 
 const UpcomingAnime = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useContext(AuthContext);
+
+  const params = new URLSearchParams(location.search);
+  const page = parseInt(params.get('page') || '1', 10);
+
   const [animeList, setAnimeList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const { user } = useContext(AuthContext);
+  const [messages, setMessages] = useState({});
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [page]);
 
   useEffect(() => {
     setLoading(true);
     setError('');
-    axios.get('https://api.jikan.moe/v4/seasons/upcoming')
+    axios.get(`https://api.jikan.moe/v4/seasons/upcoming?page=${page}`)
       .then(res => {
         setAnimeList(res.data.data || []);
         setLoading(false);
@@ -25,24 +35,7 @@ const UpcomingAnime = () => {
         setError('Failed to fetch upcoming anime.');
         setLoading(false);
       });
-  }, []);
-
-  const handleAddToMyList = async (malId) => {
-    if (!user || !user.userId) {
-      alert('Please log in first!');
-      return;
-    }
-    try {
-      await axiosInstance.post('/user-anime', {
-        userId: user.userId,
-        malId: malId
-      });
-      alert('Anime added to your list!');
-    } catch (err) {
-      console.error('Error adding anime:', err);
-      alert('Failed to add anime.');
-    }
-  };
+  }, [page]);
 
   if (loading) return <div>Loading upcoming anime...</div>;
   if (error) return <div style={{ color: 'red' }}>{error}</div>;
@@ -77,7 +70,16 @@ const UpcomingAnime = () => {
                 <p><strong>Synopsis:</strong> {item.synopsis}</p>
               )}
 
-              <button onClick={() => handleAddToMyList(item.mal_id)}>Add to My List</button>
+              {messages[item.mal_id] && (
+                <p style={{
+                  color: messages[item.mal_id].includes('added') ? 'green' : 'red',
+                  marginBottom: '0.5em'
+                }}>
+                  {messages[item.mal_id]}
+                </p>
+              )}
+
+              <button onClick={() => handleAddToList(item.mal_id, user, setMessages)}>Add to My List</button>
               <button style={{ marginLeft: '0.5em' }} onClick={() => handleViewDetails(item, navigate)}>
                 View Details
               </button>
@@ -87,7 +89,11 @@ const UpcomingAnime = () => {
       )}
 
       <div style={{ marginTop: '2em' }}>
-        <Link to="/anime">View All Anime (Local)</Link>
+        <button onClick={() => navigate(`?page=${page - 1}`)} disabled={page === 1}>
+          Previous
+        </button>
+        <span style={{ margin: '0 1em' }}>Page {page}</span>
+        <button onClick={() => navigate(`?page=${page + 1}`)}>Next</button>
       </div>
     </div>
   );

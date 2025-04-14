@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import '../styles/Navbar.css'; // Make sure this path matches your folder structure
 
 const Navbar = () => {
   const { token, user, logout } = useContext(AuthContext);
@@ -15,68 +16,29 @@ const Navbar = () => {
   };
 
   return (
-    <div style={{ borderBottom: '1px solid #ccc' }}>
-      <nav
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '1em',
-          backgroundColor: '#f0f0f0'
-        }}
-      >
+    <div className="navbar-border">
+      <nav className="navbar-container">
         {/* Left: Logo + Search */}
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '1.5em' }}>
-          <Link
-            to="/"
-            style={{
-              fontWeight: 'bold',
-              fontSize: '1.5em',
-              textDecoration: 'none',
-              color: '#333'
-            }}
-          >
-            Plat-Imee
-          </Link>
-
-          <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center' }}>
-            <input
-              type="text"
-              name="search"
-              placeholder="Search anime..."
-              style={{ padding: '0.4em', width: '200px' }}
-            />
-            <button type="submit" style={{ marginLeft: '0.5em' }}>Search</button>
+        <div className="navbar-left">
+          <Link to="/" className="navbar-logo">Plat-Imee</Link>
+          <form onSubmit={handleSearch} className="navbar-search-form">
+            <input type="text" name="search" placeholder="Search anime..." className="navbar-search-input" />
+            <button type="submit" className="navbar-search-button">Search</button>
           </form>
         </div>
 
         {/* Center: My Anime List */}
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          justifyContent: 'center'
-        }}>
+        <div className="navbar-center">
           {token && <Link to="/my-anime">My Anime List</Link>}
         </div>
 
         {/* Right: Auth Controls */}
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-          gap: '1em'
-        }}>
+        <div className="navbar-right">
           {token ? (
             <>
               <Link to="/profile">{user?.username || 'Profile'}</Link>
               <Link to="/recommendations">Recommendations</Link>
-              <button
-                onClick={logout}
-                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-              >
-                Logout
-              </button>
+              <button onClick={logout} className="navbar-logout">Logout</button>
             </>
           ) : (
             <>

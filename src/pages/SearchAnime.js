@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { handleViewDetails } from '../utils/handleViewDetails';
@@ -83,10 +83,6 @@ const SearchAnime = () => {
           ))}
         </ul>
       )}
-
-      <div style={{ marginTop: '2em' }}>
-        <Link to="/anime">View All Anime (Local)</Link>
-      </div>
     </div>
   );
 };
