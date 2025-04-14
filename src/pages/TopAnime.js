@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { handleViewDetails } from '../utils/handleViewDetails';
 import { handleAddToList } from '../utils/handleAddToList';
-import '../styles/TopAnime.css'; // Make sure this path is correct
+import '../styles/TopAnime.css';
 
 const TopAnime = () => {
   const { user } = useContext(AuthContext);
@@ -47,27 +47,28 @@ const TopAnime = () => {
       {error && <p className="error">{error}</p>}
 
       <ul className="anime-list">
-        {topAnime.map(anime => (
+        {topAnime.map((anime, index) => (
           <li key={anime.mal_id} className="anime-item">
-            <h2>{anime.title_english || anime.title}</h2>
-            {anime.images?.jpg?.image_url && (
-              <img
-                src={anime.images.jpg.image_url}
-                alt="Anime Poster"
-                className="anime-image"
-                onClick={() => handleViewDetails(anime, navigate)}
-              />
-            )}
+            <div className="anime-rank">{(page - 1) * 25 + index + 1}</div>
 
-            <p><strong>Type:</strong> {anime.type || 'TV'}</p>
-            <p><strong>Aired:</strong> {anime.aired?.string || 'Unknown'}</p>
-            <p><strong>Rating:</strong> {anime.score !== null ? anime.score : 'N/A'}</p>
+            <img
+              src={anime.images?.jpg?.image_url}
+              alt={anime.title}
+              className="anime-image"
+              onClick={() => handleViewDetails(anime, navigate)}
+            />
 
-            {messages[anime.mal_id] && (
-              <p className={`message ${messages[anime.mal_id].includes('added') ? 'success' : 'fail'}`}>
-                {messages[anime.mal_id]}
-              </p>
-            )}
+            <div className="anime-info">
+              <h2>{anime.title_english || anime.title}</h2>
+              <p><strong>Type:</strong> {anime.type || 'TV'}</p>
+              <p><strong>Aired:</strong> {anime.aired?.string || 'Unknown'}</p>
+              <p><strong>Rating:</strong> {anime.score ?? 'N/A'}</p>
+              {messages[anime.mal_id] && (
+                <p className={`message ${messages[anime.mal_id].includes('added') ? 'success' : 'fail'}`}>
+                  {messages[anime.mal_id]}
+                </p>
+              )}
+            </div>
 
             <button onClick={() => handleAddToList(anime.mal_id, user, setMessages)}>
               Add to My List
