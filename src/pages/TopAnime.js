@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { handleViewDetails } from '../utils/handleViewDetails';
 import { handleAddToList } from '../utils/handleAddToList';
+import '../styles/TopAnime.css'; // Make sure this path is correct
 
 const TopAnime = () => {
   const { user } = useContext(AuthContext);
@@ -19,7 +20,6 @@ const TopAnime = () => {
   const [messages, setMessages] = useState({});
 
   useEffect(() => {
-    // Scroll to top when component mounts or page changes
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [location.key]);
 
@@ -40,28 +40,21 @@ const TopAnime = () => {
   }, [page]);
 
   return (
-    <div style={{ padding: '1em' }}>
+    <div className="top-anime-container">
       <h1>Top Anime</h1>
 
       {loading && <p>Loading...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="error">{error}</p>}
 
-      <ul>
+      <ul className="anime-list">
         {topAnime.map(anime => (
-          <li
-            key={anime.mal_id}
-            style={{
-              marginBottom: '1em',
-              borderBottom: '1px solid #ccc',
-              paddingBottom: '1em'
-            }}
-          >
+          <li key={anime.mal_id} className="anime-item">
             <h2>{anime.title_english || anime.title}</h2>
             {anime.images?.jpg?.image_url && (
               <img
                 src={anime.images.jpg.image_url}
                 alt="Anime Poster"
-                style={{ width: '150px', cursor: 'pointer' }}
+                className="anime-image"
                 onClick={() => handleViewDetails(anime, navigate)}
               />
             )}
@@ -71,28 +64,26 @@ const TopAnime = () => {
             <p><strong>Rating:</strong> {anime.score !== null ? anime.score : 'N/A'}</p>
 
             {messages[anime.mal_id] && (
-              <p style={{
-                color: messages[anime.mal_id].includes('added') ? 'green' : 'red',
-                marginBottom: '0.5em'
-              }}>
+              <p className={`message ${messages[anime.mal_id].includes('added') ? 'success' : 'fail'}`}>
                 {messages[anime.mal_id]}
               </p>
             )}
 
-            <button onClick={() => handleAddToList(anime.mal_id, user, setMessages)}>Add to My List</button>
-            <button style={{ marginLeft: '0.5em' }} onClick={() => handleViewDetails(anime, navigate)}>
+            <button onClick={() => handleAddToList(anime.mal_id, user, setMessages)}>
+              Add to My List
+            </button>
+            <button className="view-details-btn" onClick={() => handleViewDetails(anime, navigate)}>
               View Details
             </button>
           </li>
         ))}
       </ul>
 
-      {/* Pagination Controls */}
-      <div style={{ marginTop: '2em' }}>
+      <div className="pagination">
         <button onClick={() => navigate(`?page=${page - 1}`)} disabled={page === 1}>
           Previous
         </button>
-        <span style={{ margin: '0 1em' }}>Page {page}</span>
+        <span className="page-number">Page {page}</span>
         <button onClick={() => navigate(`?page=${page + 1}`)}>Next</button>
       </div>
     </div>

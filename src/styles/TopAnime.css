@@ -1,0 +1,47 @@
+.top-anime-container {
+    padding: 1em;
+}
+
+.error {
+    color: red;
+}
+
+.anime-list {
+    list-style: none;
+    padding: 0;
+}
+
+.anime-item {
+    margin-bottom: 1em;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 1em;
+}
+
+.anime-image {
+    width: 150px;
+    cursor: pointer;
+}
+
+.message {
+    margin-bottom: 0.5em;
+}
+
+.message.success {
+    color: green;
+}
+
+.message.fail {
+    color: red;
+}
+
+.view-details-btn {
+    margin-left: 0.5em;
+}
+
+.pagination {
+    margin-top: 2em;
+}
+
+.page-number {
+    margin: 0 1em;
+}
