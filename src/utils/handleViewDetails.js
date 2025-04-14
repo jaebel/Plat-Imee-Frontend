@@ -1,8 +1,7 @@
 import axiosInstance from '../api/axiosInstance';
 
-/**
- * Optional helper to convert Jikan type to internal enum type
- */
+const localCache = new Set(); // stores malId of anime already confirmed to exist
+
 function mapJikanType(jikanType) {
   if (!jikanType) return "TV";
   const upper = jikanType.toUpperCase();
@@ -18,40 +17,38 @@ function mapJikanType(jikanType) {
   }
 }
 
-/**
- * Fetches or creates a local anime record and navigates to its details page.
- * @param {Object} anime - The anime object from Jikan.
- * @param {Function} navigate - The React Router navigation function.
- */
 export async function handleViewDetails(anime, navigate) {
   const malId = anime.mal_id;
 
-  try {
-    await axiosInstance.get(`/anime/${malId}`);
-  } catch (err) {
-    if (err.response && err.response.status === 404) {
-      try {
-        const jikanType = mapJikanType(anime.type);
-        const payload = {
-          malId,
-          name: anime.title_english || anime.title,
-          type: jikanType,
-          episodes: anime.episodes || 1,
-          score: anime.score || 0.0,
-          aired: anime.aired?.string || '',
-          premiered: anime.season || '',
-          genres: []
-        };
-        await axiosInstance.post('/anime', payload);
-      } catch (createErr) {
-        console.error('Error creating anime record:', createErr);
-        alert('Failed to create local record for this anime.');
+  if (!localCache.has(malId)) {
+    try {
+      await axiosInstance.get(`/anime/${malId}`);
+      localCache.add(malId); // mark as confirmed
+    } catch (err) {
+      if (err.response && err.response.status === 404) {
+        try {
+          const payload = {
+            malId,
+            name: anime.title_english || anime.title,
+            type: mapJikanType(anime.type),
+            episodes: anime.episodes || 1,
+            score: anime.score || 0.0,
+            aired: anime.aired?.string || '',
+            premiered: anime.season || '',
+            genres: []
+          };
+          await axiosInstance.post('/anime', payload);
+          localCache.add(malId); // mark as now existing
+        } catch (createErr) {
+          console.error('Error creating anime record:', createErr);
+          alert('Failed to create local record for this anime.');
+          return;
+        }
+      } else {
+        console.error('Error checking local anime record:', err);
+        alert('Error checking local anime record.');
         return;
       }
-    } else {
-      console.error('Error checking local anime record:', err);
-      alert('Error checking local anime record.');
-      return;
     }
   }
 

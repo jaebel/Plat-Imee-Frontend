@@ -16,7 +16,8 @@ import BrowseByGenre from './pages/BrowseByGenre';
 import EditProfile from './pages/EditProfile';
 import Recommendations from './pages/Recommendations';
 import AllAnime from './pages/AllAnime';
-import UpcomingAnime from './pages/UpcomingAnime'; // ✅ Import added
+import UpcomingAnime from './pages/UpcomingAnime';
+import SeasonalAnime from './pages/SeasonalAnime';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
           <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/anime" element={<AnimeList />} />
           <Route path="/all-anime" element={<AllAnime />} />
+          <Route path="/seasonal" element={<SeasonalAnime />} />
           
           {/* Protected routes */}
           <Route 
