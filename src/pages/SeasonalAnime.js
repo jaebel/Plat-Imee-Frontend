@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
 import { handleViewDetails } from '../utils/handleViewDetails';
+import { handleAddToList } from '../utils/handleAddToList';
 
 const SeasonalAnime = () => {
   const { user } = useContext(AuthContext);
@@ -25,29 +25,6 @@ const SeasonalAnime = () => {
         setLoading(false);
       });
   }, []);
-
-  const handleAddToMyList = async (malId) => {
-    const newMessages = { ...messages };
-
-    if (!user || !user.userId) {
-      newMessages[malId] = 'You must be logged in to add anime to your list.';
-      setMessages(newMessages);
-      return;
-    }
-
-    try {
-      await axiosInstance.post('/user-anime', {
-        userId: user.userId,
-        malId: malId
-      });
-      newMessages[malId] = 'Anime added to your list!';
-    } catch (err) {
-      console.error('Error adding anime:', err);
-      newMessages[malId] = 'Failed to add anime.';
-    }
-
-    setMessages(newMessages);
-  };
 
   return (
     <div style={{ padding: '1em' }}>
@@ -89,7 +66,7 @@ const SeasonalAnime = () => {
               </p>
             )}
 
-            <button onClick={() => handleAddToMyList(anime.mal_id)}>Add to My List</button>
+            <button onClick={() => handleAddToList(anime.mal_id, user, setMessages)}>Add to My List</button>
             <button
               style={{ marginLeft: '0.5em' }}
               onClick={() => handleViewDetails(anime, navigate)}

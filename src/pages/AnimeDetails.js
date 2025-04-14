@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
 import JikanService from '../services/JikanService';
+import { handleAddToList } from '../utils/handleAddToList';
 
 const AnimeDetails = () => {
   // Retrieve the anime id from the URL (this is now the MAL ID)
@@ -43,20 +44,17 @@ const AnimeDetails = () => {
     }
   }, [anime]);
 
-  const handleAddToList = async () => {
+  const handleAdd = async () => {
+    if (!anime) return;
     if (!user || !user.userId) {
       setShowLoginMessage(true);
       return;
     }
 
     try {
-      await axiosInstance.post('/user-anime', {
-        userId: user.userId,
-        malId: anime.malId  // Use malId instead of animeId
-      });
+      await handleAddToList(anime.malId, user, () => {});
       setButtonText('Added');
-    } catch (error) {
-      console.error('Error adding anime:', error);
+    } catch (err) {
       setButtonText('Error');
     }
   };
@@ -94,7 +92,7 @@ const AnimeDetails = () => {
         </p>
       )}
 
-      <button onClick={handleAddToList}>{buttonText}</button>
+      <button onClick={handleAdd}>{buttonText}</button>
     </div>
   );
 };

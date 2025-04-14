@@ -1,15 +1,20 @@
 import React, { useState, useContext } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { handleAddToList } from '../utils/handleAddToList';
+import { handleViewDetails } from '../utils/handleViewDetails';
 
 const Recommendations = () => {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const [recommendations, setRecommendations] = useState([]);
   const [safeSearch, setSafeSearch] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [messages, setMessages] = useState({});
 
   const fetchRecommendations = async () => {
     if (!user || !user.userId) return;
@@ -17,14 +22,12 @@ const Recommendations = () => {
     setLoading(true);
     setError('');
     try {
-      // Step 1: Get recommended MAL IDs
       const response = await axiosInstance.get('/recs/me', {
         params: { safeSearch: safeSearch }
       });
 
       const ids = response.data.map(rec => rec.mal_id);
 
-      // Step 2: Fetch details for each recommended anime using Jikan API
       const fetchedDetails = await Promise.all(
         ids.map(async (id) => {
           try {
@@ -77,13 +80,25 @@ const Recommendations = () => {
                 <img
                   src={anime.images.jpg.image_url}
                   alt={anime.title}
-                  style={{ width: '150px' }}
+                  style={{ width: '150px', cursor: 'pointer' }}
+                  onClick={() => handleViewDetails(anime, navigate)}
                 />
               )}
               <p><strong>Type:</strong> {anime.type || 'Unknown'}</p>
               <p><strong>Aired:</strong> {anime.aired?.string || 'N/A'}</p>
               <p><strong>Rating:</strong> {anime.rating || 'N/A'}</p>
-              <Link to={`/anime/${anime.mal_id}`}>View Details</Link>
+
+              {messages[anime.mal_id] && (
+                <p style={{
+                  color: messages[anime.mal_id].includes('added') ? 'green' : 'red',
+                  marginBottom: '0.5em'
+                }}>
+                  {messages[anime.mal_id]}
+                </p>
+              )}
+
+              <button onClick={() => handleAddToList(anime.mal_id, user, setMessages)}>Add to My List</button>
+              <button style={{ marginLeft: '0.5em' }} onClick={() => handleViewDetails(anime, navigate)}>View Details</button>
             </li>
           ))}
         </ul>

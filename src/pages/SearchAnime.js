@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
 import { handleViewDetails } from '../utils/handleViewDetails';
+import { handleAddToList } from '../utils/handleAddToList';
 
 const SearchAnime = () => {
   const location = useLocation();
@@ -33,23 +33,6 @@ const SearchAnime = () => {
         setLoading(false);
       });
   }, [query]);
-
-  const handleAddToMyList = async (malId) => {
-    if (!user || !user.userId) {
-      alert('Please log in first!');
-      return;
-    }
-    try {
-      await axiosInstance.post('/user-anime', {
-        userId: user.userId,
-        malId: malId
-      });
-      alert('Anime added to your list!');
-    } catch (err) {
-      console.error('Error adding anime:', err);
-      alert('Failed to add anime.');
-    }
-  };
 
   if (!query.trim()) {
     return <div style={{ padding: '1em' }}>No search term provided.</div>;
@@ -88,9 +71,7 @@ const SearchAnime = () => {
                 <p><strong>Synopsis:</strong> {item.synopsis}</p>
               )}
 
-              <button onClick={() => handleAddToMyList(item.mal_id)}>
-                Add to My List
-              </button>
+              <button onClick={() => handleAddToList(item.mal_id, user)}>Add to My List</button>
 
               <button
                 style={{ marginLeft: '0.5em' }}

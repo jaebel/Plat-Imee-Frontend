@@ -1,9 +1,9 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
-import axiosInstance from '../api/axiosInstance';
-import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import { handleViewDetails } from '../utils/handleViewDetails';
+import { handleAddToList } from '../utils/handleAddToList';
 
 const JIKAN_GENRE_OPTIONS = [
   { id: 1, name: "Action" },
@@ -126,29 +126,6 @@ const BrowseByGenre = () => {
     }
   };
 
-  const handleAddToMyList = async (malId) => {
-    const newMessages = { ...messages };
-
-    if (!user || !user.userId) {
-      newMessages[malId] = 'You must be logged in to add anime to your list.';
-      setMessages(newMessages);
-      return;
-    }
-
-    try {
-      await axiosInstance.post('/user-anime', {
-        userId: user.userId,
-        malId: malId
-      });
-      newMessages[malId] = 'Anime added to your list!';
-    } catch (err) {
-      console.error('Error adding anime:', err);
-      newMessages[malId] = 'Failed to add anime.';
-    }
-
-    setMessages(newMessages);
-  };
-
   return (
     <div style={{ padding: '1em' }}>
       <h1>Browse Anime by Genre</h1>
@@ -209,7 +186,7 @@ const BrowseByGenre = () => {
                   </p>
                 )}
 
-                <button onClick={() => handleAddToMyList(item.mal_id)}>Add to My List</button>
+                <button onClick={() => handleAddToList(item.mal_id, user, setMessages)}>Add to My List</button>
                 <button
                   style={{ marginLeft: '0.5em' }}
                   onClick={() => handleViewDetails(item, navigate)}
