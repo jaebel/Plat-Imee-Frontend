@@ -63,19 +63,23 @@ const TopAnime = () => {
               <p><strong>Type:</strong> {anime.type || 'TV'}</p>
               <p><strong>Aired:</strong> {anime.aired?.string || 'Unknown'}</p>
               <p><strong>Rating:</strong> {anime.score ?? 'N/A'}</p>
+
               {messages[anime.mal_id] && (
                 <p className={`message ${messages[anime.mal_id].includes('added') ? 'success' : 'fail'}`}>
                   {messages[anime.mal_id]}
                 </p>
               )}
-            </div>
 
-            <button onClick={() => handleAddToList(anime.mal_id, user, setMessages)}>
-              Add to My List
-            </button>
-            <button className="view-details-btn" onClick={() => handleViewDetails(anime, navigate)}>
-              View Details
-            </button>
+              {/* ✅ Properly styled button block */}
+              <div className="anime-actions">
+                <button onClick={() => handleAddToList(anime.mal_id, user, setMessages)}>
+                  Add to My List
+                </button>
+                <button onClick={() => handleViewDetails(anime, navigate)}>
+                  View Details
+                </button>
+              </div>
+            </div>
           </li>
         ))}
       </ul>

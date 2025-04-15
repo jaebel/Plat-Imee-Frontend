@@ -1,47 +1,132 @@
 .top-anime-container {
-    padding: 1em;
+    padding: 2em 5%;
+    background-color: #121212;
+    color: #ffffff;
+    font-family: 'Segoe UI', sans-serif;
 }
 
-.error {
-    color: red;
+.top-anime-container h1 {
+    font-size: 2rem;
+    margin-bottom: 1.5em;
+    border-bottom: 2px solid #444;
+    padding-bottom: 0.5em;
 }
 
+/* ✅ CHANGED: Grid layout for 2 cards per row */
 .anime-list {
-    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 1.5em;
     padding: 0;
+    margin: 0;
+    list-style: none;
 }
 
 .anime-item {
-    margin-bottom: 1em;
-    border-bottom: 1px solid #ccc;
-    padding-bottom: 1em;
+    display: grid;
+    grid-template-columns: 40px 100px 1fr;
+    align-items: center;
+    gap: 1em;
+    padding: 1em;
+    border: 1px solid #333;
+    border-radius: 6px;
+    background-color: #1a1a1a;
+    min-height: 150px;
 }
 
-.anime-image {
-    width: 150px;
+.anime-rank {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: gold;
+    text-align: center;
+    line-height: 100px;
+}
+
+.top-anime-container .anime-image {
+    width: 100px;
+    height: auto;
+    border-radius: 4px;
     cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.top-anime-container .anime-image:hover {
+    transform: scale(1.05);
+}
+
+.anime-info h2 {
+    font-size: 1.1rem;
+    margin: 0 0 0.5em;
+    color: #fff;
+}
+
+.anime-info p {
+    margin: 0.2em 0;
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+/* Keep buttons stacked for now; adjust if you want them inline */
+.anime-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    align-items: flex-end;
+}
+
+.anime-actions button {
+    background-color: #6e5151;
+    color: white;
+    border: none;
+    padding: 0.5em 1.2em;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;              /* ✅ Prevent text wrapping */
+    width: fit-content;               /* ✅ Let button size match content */
+    min-width: 120px;                 /* ✅ Optional: consistent width baseline */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+
+.anime-actions button:hover {
+    background-color: #3d5a73;
 }
 
 .message {
-    margin-bottom: 0.5em;
+    font-size: 0.85rem;
+    margin-top: 0.5em;
 }
 
 .message.success {
-    color: green;
+    color: #00e676;
 }
 
 .message.fail {
-    color: red;
-}
-
-.view-details-btn {
-    margin-left: 0.5em;
+    color: #ff5252;
 }
 
 .pagination {
-    margin-top: 2em;
+    margin-top: 3em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
 }
 
 .page-number {
-    margin: 0 1em;
+    font-weight: bold;
+}
+
+.anime-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin: 0 0 0.5em;
+    color: #fff;
+    text-align: left;
+    line-height: 1.3;
+    text-decoration: none;
+    cursor: default;
 }

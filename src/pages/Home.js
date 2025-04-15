@@ -27,7 +27,7 @@ const Home = () => {
 
       <div className="home-buttons">
         <button onClick={() => navigate('/top')} className="home-button">Top Anime</button>
-        <button onClick={() => navigate('/browse-genre')} className="home-button">Browse by Genre</button>
+        <button onClick={() => navigate('/genre-picker')} className="home-button">Browse by Genre</button>
         <button onClick={() => navigate('/all-anime')} className="home-button">All Anime</button>
         <button onClick={() => navigate('/upcoming')} className="home-button">Upcoming Anime</button>
       </div>

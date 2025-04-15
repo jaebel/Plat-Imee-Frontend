@@ -1,8 +1,8 @@
-// Login.js
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
+import '../styles/SignUp.css'; // Reuse the same styles for consistency
 
 const Login = () => {
   const navigate = useNavigate();
@@ -28,14 +28,9 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Call login endpoint
       const response = await axiosInstance.post('/auth/login', form);
-      // The response should contain { token, user: { userId, username, email } }
       const { token: jwtToken, user } = response.data;
-
-      // Store both the token and user data in AuthContext
       login(jwtToken, user);
-
       navigate('/');
     } catch (err) {
       console.error(err);
@@ -46,32 +41,30 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
+    <div className="signup-container">
       <h1>Login</h1>
-      {error && <div className="error-message" style={{ color: 'red' }}>{error}</div>}
+      {error && <div className="error">{error}</div>}
       <form onSubmit={handleSubmit}>
-        <div className="form-field">
-          <label htmlFor="username">Username:</label>
-          <input 
+        <label>
+          Username:
+          <input
             type="text"
-            id="username"
             name="username"
             value={form.username}
             onChange={handleChange}
             required
           />
-        </div>
-        <div className="form-field">
-          <label htmlFor="password">Password:</label>
-          <input 
+        </label>
+        <label>
+          Password:
+          <input
             type="password"
-            id="password"
             name="password"
             value={form.password}
             onChange={handleChange}
             required
           />
-        </div>
+        </label>
         <button type="submit" disabled={loading}>
           {loading ? 'Logging in...' : 'Login'}
         </button>

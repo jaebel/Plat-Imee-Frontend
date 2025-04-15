@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { handleViewDetails } from '../utils/handleViewDetails';
 import { handleAddToList } from '../utils/handleAddToList';
+import '../styles/TopAnime.css'; // Reuse shared styling
 
 const SeasonalAnime = () => {
   const { user } = useContext(AuthContext);
@@ -32,65 +33,60 @@ const SeasonalAnime = () => {
         setError('Failed to fetch seasonal anime.');
         setLoading(false);
       });
-  }, [location.search]); // use location.search as a dependency
+  }, [location.search]);
 
   return (
-    <div style={{ padding: '1em' }}>
+    <div className="top-anime-container">
       <h1>Trending This Season</h1>
 
       {loading && <p>Loading seasonal anime...</p>}
-      {error && <div style={{ color: 'red' }}>{error}</div>}
+      {error && <p className="error">{error}</p>}
 
-      <ul>
+      <ul className="anime-list">
         {animeList.map(anime => (
-          <li
-            key={anime.mal_id}
-            style={{
-              marginBottom: '1em',
-              borderBottom: '1px solid #ccc',
-              paddingBottom: '1em'
-            }}
-          >
-            <h2>{anime.title_english || anime.title}</h2>
-            {anime.images?.jpg?.image_url && (
-              <img
-                src={anime.images.jpg.image_url}
-                alt={anime.title}
-                style={{ width: '150px', cursor: 'pointer' }}
-                onClick={() => handleViewDetails(anime, navigate)}
-              />
-            )}
+          <li key={anime.mal_id} className="anime-item">
+            <div className="anime-rank" style={{ visibility: 'hidden' }}>•</div>
 
-            <p><strong>Type:</strong> {anime.type || 'TV'}</p>
-            <p><strong>Aired:</strong> {anime.aired?.string || 'Unknown'}</p>
-            <p><strong>Rating:</strong> {anime.score !== null ? anime.score : 'N/A'}</p>
-
-            {messages[anime.mal_id] && (
-              <p style={{
-                color: messages[anime.mal_id].includes('added') ? 'green' : 'red',
-                marginBottom: '0.5em'
-              }}>
-                {messages[anime.mal_id]}
-              </p>
-            )}
-
-            <button onClick={() => handleAddToList(anime.mal_id, user, setMessages)}>Add to My List</button>
-            <button
-              style={{ marginLeft: '0.5em' }}
+            <img
+              src={anime.images?.jpg?.image_url}
+              alt={anime.title}
+              className="anime-image"
               onClick={() => handleViewDetails(anime, navigate)}
-            >
-              View Details
-            </button>
+            />
+
+            <div className="anime-info">
+              <h2 className="anime-title">
+                {anime.title_english || anime.title}
+              </h2>
+
+              <p><strong>Type:</strong> {anime.type || 'TV'}</p>
+              <p><strong>Aired:</strong> {anime.aired?.string || 'Unknown'}</p>
+              <p><strong>Rating:</strong> {anime.score !== null ? anime.score : 'N/A'}</p>
+
+              {messages[anime.mal_id] && (
+                <p className={`message ${messages[anime.mal_id].includes('added') ? 'success' : 'fail'}`}>
+                  {messages[anime.mal_id]}
+                </p>
+              )}
+
+              <div className="anime-actions">
+                <button onClick={() => handleAddToList(anime.mal_id, user, setMessages)}>
+                  Add to My List
+                </button>
+                <button onClick={() => handleViewDetails(anime, navigate)}>
+                  View Details
+                </button>
+              </div>
+            </div>
           </li>
         ))}
       </ul>
 
-      {/* Pagination Controls */}
-      <div style={{ marginTop: '2em' }}>
+      <div className="pagination">
         <button onClick={() => navigate(`?page=${page - 1}`)} disabled={page === 1}>
           Previous
         </button>
-        <span style={{ margin: '0 1em' }}>Page {page}</span>
+        <span className="page-number">Page {page}</span>
         <button onClick={() => navigate(`?page=${page + 1}`)}>
           Next
         </button>

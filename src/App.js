@@ -12,7 +12,8 @@ import AnimeDetails from './pages/AnimeDetails';
 import MyAnimeList from './pages/MyAnimeList';
 import SearchAnime from './pages/SearchAnime';
 import TopAnime from './pages/TopAnime';
-import BrowseByGenre from './pages/BrowseByGenre';
+import GenrePicker from './pages/GenrePicker';
+import GenreResults from './pages/GenreResults';
 import EditProfile from './pages/EditProfile';
 import Recommendations from './pages/Recommendations';
 import AllAnime from './pages/AllAnime';
@@ -32,7 +33,8 @@ function App() {
           <Route path="/search" element={<SearchAnime />} />
           <Route path="/top" element={<TopAnime />} />
           <Route path="/upcoming" element={<UpcomingAnime />} />
-          <Route path="/browse-genre" element={<BrowseByGenre />} />
+          <Route path="/genre-picker" element={<GenrePicker />} />
+          <Route path="/genre-results" element={<GenreResults />} />
           <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/anime" element={<AnimeList />} />
           <Route path="/all-anime" element={<AllAnime />} />

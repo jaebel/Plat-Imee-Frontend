@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { handleViewDetails } from '../utils/handleViewDetails';
 import { handleAddToList } from '../utils/handleAddToList';
+import '../styles/TopAnime.css';
 
 const UpcomingAnime = () => {
   const navigate = useNavigate();
@@ -37,62 +38,64 @@ const UpcomingAnime = () => {
       });
   }, [page]);
 
-  if (loading) return <div>Loading upcoming anime...</div>;
-  if (error) return <div style={{ color: 'red' }}>{error}</div>;
-
   return (
-    <div style={{ padding: '1em' }}>
+    <div className="top-anime-container">
       <h1>Upcoming Anime</h1>
+
+      {loading && <p>Loading upcoming anime...</p>}
+      {error && <p className="error">{error}</p>}
+
       {animeList.length === 0 ? (
         <p>No upcoming anime found.</p>
       ) : (
-        <ul>
+        <ul className="anime-list">
           {animeList.map(item => (
-            <li
-              key={item.mal_id}
-              style={{ marginBottom: '1em', borderBottom: '1px solid #ccc', paddingBottom: '1em' }}
-            >
-              <h2
-                style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                onClick={() => handleViewDetails(item, navigate)}
-              >
-                {item.title_english || item.title}
-              </h2>
-              {item.images?.jpg?.image_url && (
-                <img
-                  src={item.images.jpg.image_url}
-                  alt="Anime Poster"
-                  style={{ width: '150px', cursor: 'pointer' }}
-                  onClick={() => handleViewDetails(item, navigate)}
-                />
-              )}
-              {item.synopsis && (
-                <p><strong>Synopsis:</strong> {item.synopsis}</p>
-              )}
+            <li key={item.mal_id} className="anime-item">
+              <div className="anime-rank" style={{ visibility: 'hidden' }}>•</div>
 
-              {messages[item.mal_id] && (
-                <p style={{
-                  color: messages[item.mal_id].includes('added') ? 'green' : 'red',
-                  marginBottom: '0.5em'
-                }}>
-                  {messages[item.mal_id]}
-                </p>
-              )}
+              <img
+                src={item.images?.jpg?.image_url}
+                alt={item.title}
+                className="anime-image"
+              />
 
-              <button onClick={() => handleAddToList(item.mal_id, user, setMessages)}>Add to My List</button>
-              <button style={{ marginLeft: '0.5em' }} onClick={() => handleViewDetails(item, navigate)}>
-                View Details
-              </button>
+              <div className="anime-info">
+                <h2 className="anime-title">
+                  {item.title_english || item.title}
+                </h2>
+
+                {item.synopsis && (
+                  <p><strong>Synopsis:</strong> {item.synopsis}</p>
+                )}
+                <p><strong>Type:</strong> {item.type || 'TV'}</p>
+                <p><strong>Aired:</strong> {item.aired?.string || 'Unknown'}</p>
+                <p><strong>Rating:</strong> {item.score ?? 'N/A'}</p>
+
+                {messages[item.mal_id] && (
+                  <p className={`message ${messages[item.mal_id].includes('added') ? 'success' : 'fail'}`}>
+                    {messages[item.mal_id]}
+                  </p>
+                )}
+
+                <div className="anime-actions">
+                  <button onClick={() => handleAddToList(item.mal_id, user, setMessages)}>
+                    Add to My List
+                  </button>
+                  <button onClick={() => handleViewDetails(item, navigate)}>
+                    View Details
+                  </button>
+                </div>
+              </div>
             </li>
           ))}
         </ul>
       )}
 
-      <div style={{ marginTop: '2em' }}>
+      <div className="pagination">
         <button onClick={() => navigate(`?page=${page - 1}`)} disabled={page === 1}>
           Previous
         </button>
-        <span style={{ margin: '0 1em' }}>Page {page}</span>
+        <span className="page-number">Page {page}</span>
         <button onClick={() => navigate(`?page=${page + 1}`)}>Next</button>
       </div>
     </div>

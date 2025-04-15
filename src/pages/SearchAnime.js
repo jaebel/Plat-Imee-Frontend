@@ -4,6 +4,7 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { handleViewDetails } from '../utils/handleViewDetails';
 import { handleAddToList } from '../utils/handleAddToList';
+import '../styles/TopAnime.css'; // Shared styling
 
 const SearchAnime = () => {
   const location = useLocation();
@@ -35,50 +36,54 @@ const SearchAnime = () => {
   }, [query]);
 
   if (!query.trim()) {
-    return <div style={{ padding: '1em' }}>No search term provided.</div>;
+    return <div className="top-anime-container">No search term provided.</div>;
   }
 
   if (loading) {
-    return <div style={{ padding: '1em' }}>Searching for "{query}"...</div>;
+    return <div className="top-anime-container">Searching for "{query}"...</div>;
   }
 
   if (error) {
-    return <div style={{ color: 'red', padding: '1em' }}>{error}</div>;
+    return <div className="top-anime-container error">{error}</div>;
   }
 
   return (
-    <div style={{ padding: '1em' }}>
+    <div className="top-anime-container">
       <h1>Search Results for "{query}"</h1>
+
       {results.length === 0 ? (
         <p>No anime found.</p>
       ) : (
-        <ul>
+        <ul className="anime-list">
           {results.map(item => (
-            <li
-              key={item.mal_id}
-              style={{ marginBottom: '1em', borderBottom: '1px solid #ccc', paddingBottom: '1em' }}
-            >
-              <h2>{item.title_english || item.title}</h2>
-              {item.images?.jpg?.image_url && (
-                <img
-                  src={item.images.jpg.image_url}
-                  alt="Anime Poster"
-                  style={{ width: '150px', cursor: 'pointer' }}
-                  onClick={() => handleViewDetails(item, navigate)}
-                />
-              )}
-              {item.synopsis && (
-                <p><strong>Synopsis:</strong> {item.synopsis}</p>
-              )}
+            <li key={item.mal_id} className="anime-item">
+              <div className="anime-rank" style={{ visibility: 'hidden' }}>•</div>
 
-              <button onClick={() => handleAddToList(item.mal_id, user)}>Add to My List</button>
-
-              <button
-                style={{ marginLeft: '0.5em' }}
+              <img
+                src={item.images?.jpg?.image_url}
+                alt="Anime Poster"
+                className="anime-image"
                 onClick={() => handleViewDetails(item, navigate)}
-              >
-                View Details
-              </button>
+              />
+
+              <div className="anime-info">
+                <h2 className="anime-title">
+                  {item.title_english || item.title}
+                </h2>
+
+                <p><strong>Type:</strong> {item.type || 'TV'}</p>
+                <p><strong>Aired:</strong> {item.aired?.string || 'Unknown'}</p>
+                <p><strong>Rating:</strong> {item.score ?? 'N/A'}</p>
+
+                <div className="anime-actions">
+                  <button onClick={() => handleAddToList(item.mal_id, user)}>
+                    Add to My List
+                  </button>
+                  <button onClick={() => handleViewDetails(item, navigate)}>
+                    View Details
+                  </button>
+                </div>
+              </div>
             </li>
           ))}
         </ul>
