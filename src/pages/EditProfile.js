@@ -2,11 +2,12 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
+import '../styles/Profile.css';
 
 const EditProfile = () => {
   const navigate = useNavigate();
   // Retrieve token and user details from AuthContext
-  const { token, user, login } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext); // used to have login
 
   // Local state for form fields, loading, error and success messages
   const [form, setForm] = useState({
@@ -76,7 +77,7 @@ const EditProfile = () => {
       const res = await axiosInstance.patch(`/users/${user.userId}`, payload);
       setSuccess('Profile updated successfully!');
       console.log('Updated user:', res.data);
-      
+
       // Optionally update AuthContext with new user details
       // For example: login(token, res.data);
 
@@ -88,21 +89,21 @@ const EditProfile = () => {
     }
   };
 
-  if (loading) return <div>Loading profile...</div>;
-  if (error) return <div style={{ color: 'red' }}>{error}</div>;
+  if (loading) return <div className="profile-container">Loading profile...</div>;
+  if (error) return <div className="profile-container" style={{ color: 'red' }}>{error}</div>;
 
   return (
-    <div style={{ padding: '1em' }}>
+    <div className="profile-container">
       <h1>Edit Profile</h1>
-      {success && <div style={{ color: 'green' }}>{success}</div>}
-      <form onSubmit={handleSubmit}>
+      {success && <div className="success">{success}</div>}
+      <form onSubmit={handleSubmit} className="profile-form">
         {/* Username Field (read-only display only) */}
-        <div style={{ marginBottom: '1em' }}>
+        <div className="form-group">
           <label htmlFor="username"><strong>Username:</strong></label>
-          <div id="username">{form.username}</div>
+          <div id="username" className="readonly">{form.username}</div>
         </div>
         {/* Email Field */}
-        <div style={{ marginBottom: '1em' }}>
+        <div className="form-group">
           <label htmlFor="email"><strong>Email:</strong></label>
           <input
             type="email"
@@ -114,7 +115,7 @@ const EditProfile = () => {
           />
         </div>
         {/* First Name Field */}
-        <div style={{ marginBottom: '1em' }}>
+        <div className="form-group">
           <label htmlFor="firstName"><strong>First Name:</strong></label>
           <input
             type="text"
@@ -125,7 +126,7 @@ const EditProfile = () => {
           />
         </div>
         {/* Last Name Field */}
-        <div style={{ marginBottom: '1em' }}>
+        <div className="form-group">
           <label htmlFor="lastName"><strong>Last Name:</strong></label>
           <input
             type="text"
@@ -136,7 +137,7 @@ const EditProfile = () => {
           />
         </div>
         {/* Password Field */}
-        <div style={{ marginBottom: '1em' }}>
+        <div className="form-group">
           <label htmlFor="password"><strong>Password:</strong></label>
           <input
             type="password"

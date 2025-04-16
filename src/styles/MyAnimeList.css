@@ -1,0 +1,82 @@
+.my-anime-list-container {
+    padding: 2em 5%;
+    background-color: #181818;
+    color: #f0f0f0;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  .my-anime-list-container h1 {
+    font-size: 2rem;
+    margin-bottom: 1em;
+    border-bottom: 2px solid #444;
+    padding-bottom: 0.5em;
+  }
+  
+  .my-anime-list-tabs button {
+    margin-right: 0.5em;
+    padding: 0.5em 1em;
+    font-size: 0.95rem;
+    border: none;
+    background-color: #2c2c2c;
+    color: #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .my-anime-list-tabs button:hover,
+  .my-anime-list-tabs button.active {
+    background-color: #3f3f3f;
+    color: #fff;
+    font-weight: bold;
+  }
+  
+  .my-anime-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1em;
+    background-color: #202020;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .my-anime-list-table th,
+  .my-anime-list-table td {
+    padding: 0.75em;
+    border-bottom: 1px solid #333;
+    text-align: left;
+    word-wrap: break-word;
+  }
+  
+  .my-anime-list-table th {
+    background-color: #292929;
+    color: #ddd;
+  }
+  
+  .my-anime-list-table tr:hover {
+    background-color: #2c2c2c;
+  }
+  
+  .my-anime-list-table button {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 0.4em 0.8em;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  
+  .my-anime-list-table button:hover {
+    background-color: #3e8e41;
+  }
+  
+  .my-anime-list-table .delete-btn {
+    background-color: #ff4d4d;
+    margin-left: 0.5em;
+  }
+  
+  .my-anime-list-table .delete-btn:hover {
+    background-color: #e63939;
+  }
+  

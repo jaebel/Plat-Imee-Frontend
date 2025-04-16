@@ -60,6 +60,12 @@ const GenreResults = () => {
               <p><strong>Aired:</strong> {item.aired?.string || 'Unknown'}</p>
               <p><strong>Rating:</strong> {item.score !== null ? item.score : 'N/A'}</p>
 
+              {messages[item.mal_id] && (
+                <p className={`message ${messages[item.mal_id].includes('added') ? 'success' : 'fail'}`}>
+                  {messages[item.mal_id]}
+                </p>
+              )}
+
               <div className="anime-actions">
                 <button onClick={() => handleAddToList(item.mal_id, user, setMessages)}>Add to My List</button>
                 <button onClick={() => handleViewDetails(item, navigate)}>View Details</button>

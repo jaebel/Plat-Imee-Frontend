@@ -4,9 +4,9 @@ import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
 import JikanService from '../services/JikanService';
 import { handleAddToList } from '../utils/handleAddToList';
+import '../styles/AnimeDetails.css';
 
 const AnimeDetails = () => {
-  // Retrieve the anime id from the URL (this is now the MAL ID)
   const { id } = useParams();
   const [anime, setAnime] = useState(null);
   const [jikanData, setJikanData] = useState(null);
@@ -15,7 +15,6 @@ const AnimeDetails = () => {
   const [buttonText, setButtonText] = useState('Add to My List');
   const [showLoginMessage, setShowLoginMessage] = useState(false);
 
-  // Pull the user from AuthContext, so we can get the correct userId
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
@@ -31,7 +30,6 @@ const AnimeDetails = () => {
       });
   }, [id]);
 
-  // Fetch additional details from Jikan using the MAL ID without affecting existing code.
   useEffect(() => {
     if (anime && anime.malId) {
       JikanService.getAnimeDetails(anime.malId)
@@ -64,35 +62,36 @@ const AnimeDetails = () => {
   if (!anime) return <div>No anime found.</div>;
 
   return (
-    <div>
+    <div className="anime-details-container">
       <h1>{anime.name}</h1>
-      <p>Type: {anime.type}</p>
-      <p>Score: {anime.score}</p>
-      <p>Episodes: {anime.episodes}</p>
-      <p>Genres: {anime.genres.join(", ")}</p>
-      <p>Aired: {anime.aired}</p>
-      <p>Premiered: {anime.premiered}</p>
-      {anime.englishName && <p>English Name: {anime.englishName}</p>}
-      {anime.japaneseName && <p>Japanese Name: {anime.japaneseName}</p>}
+      <div className="anime-details-meta">
+        <p><strong>Type:</strong> {anime.type}</p>
+        <p><strong>Score:</strong> {anime.score}</p>
+        <p><strong>Episodes:</strong> {anime.episodes}</p>
+        <p><strong>Genres:</strong> {anime.genres.join(", ")}</p>
+        <p><strong>Aired:</strong> {anime.aired}</p>
+        <p><strong>Premiered:</strong> {anime.premiered}</p>
+        {anime.englishName && <p><strong>English Name:</strong> {anime.englishName}</p>}
+        {anime.japaneseName && <p><strong>Japanese Name:</strong> {anime.japaneseName}</p>}
+      </div>
 
-      {/* Display additional details from Jikan if available */}
       {jikanData && (
         <div>
           <h2>Additional Info from Jikan</h2>
           {jikanData.images && jikanData.images.jpg && (
-            <img src={jikanData.images.jpg.image_url} alt="Anime" style={{ width: '200px' }} />
+            <img src={jikanData.images.jpg.image_url} alt="Anime" className="anime-details-image" />
           )}
-          <p><strong>Synopsis:</strong> {jikanData.synopsis}</p>
+          <p className="anime-details-synopsis"><strong>Synopsis:</strong> {jikanData.synopsis}</p>
         </div>
       )}
 
       {showLoginMessage && (
-        <p style={{ color: 'red', marginBottom: '10px' }}>
+        <p className="anime-details-login-warning">
           You must be logged in to add anime to your list.
         </p>
       )}
 
-      <button onClick={handleAdd}>{buttonText}</button>
+      <button onClick={handleAdd} className="anime-details-add-btn">{buttonText}</button>
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axiosInstance from '../api/axiosInstance';
 import { Link } from 'react-router-dom';
+import '../styles/MyAnimeList.css';
 
 const TABS = [
   { label: 'All Anime', value: 'ALL' },
@@ -15,16 +16,11 @@ const TABS = [
 const MyAnimeList = () => {
   const { user } = useContext(AuthContext);
 
-  // All user-anime records
   const [records, setRecords] = useState([]);
   const [animeNames, setAnimeNames] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Active tab (status)
   const [activeTab, setActiveTab] = useState('ALL');
-
-  // Inline editing state
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({
     status: '',
@@ -32,7 +28,6 @@ const MyAnimeList = () => {
     episodesWatched: ''
   });
 
-  // Fetch user-anime records once user is known
   useEffect(() => {
     if (!user || !user.userId) {
       setError('No user logged in.');
@@ -44,7 +39,6 @@ const MyAnimeList = () => {
       .then(async res => {
         const userRecords = res.data;
         setRecords(userRecords);
-
         const malIds = [...new Set(userRecords.map(r => r.malId))];
         const nameMap = {};
 
@@ -67,12 +61,10 @@ const MyAnimeList = () => {
       });
   }, [user]);
 
-  // Filter records based on active tab
   const filteredRecords = activeTab === 'ALL'
     ? records
     : records.filter(rec => rec.status === activeTab);
 
-  // Start editing a record
   const handleEditClick = (record) => {
     setEditingId(record.id);
     setEditData({
@@ -82,19 +74,16 @@ const MyAnimeList = () => {
     });
   };
 
-  // Cancel editing
   const handleCancelEdit = () => {
     setEditingId(null);
     setEditData({ status: '', rating: '', episodesWatched: '' });
   };
 
-  // Handle input changes in the edit form
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setEditData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Save the updated record via PATCH
   const handleSave = (recordId) => {
     const payload = {
       status: editData.status || null,
@@ -105,7 +94,6 @@ const MyAnimeList = () => {
     axiosInstance.patch(`/user-anime/${recordId}`, payload)
       .then(res => {
         const updated = res.data;
-        // Update local records
         setRecords(prev => prev.map(r => (r.id === recordId ? updated : r)));
         setEditingId(null);
       })
@@ -115,13 +103,11 @@ const MyAnimeList = () => {
       });
   };
 
-  // Delete a record via DELETE
   const handleDelete = (recordId) => {
     if (!window.confirm('Are you sure you want to remove this anime from your list?')) return;
 
     axiosInstance.delete(`/user-anime/${recordId}`)
       .then(() => {
-        // Remove it from local state
         setRecords(prev => prev.filter(r => r.id !== recordId));
       })
       .catch(err => {
@@ -141,19 +127,15 @@ const MyAnimeList = () => {
   if (!user) return <div style={{ color: 'red' }}>No user logged in.</div>;
 
   return (
-    <div style={{ padding: '1em' }}>
+    <div className="my-anime-list-container">
       <h1>My Anime List</h1>
 
-      {/* Tabs for filtering by status */}
-      <div style={{ marginBottom: '1em' }}>
+      <div className="my-anime-list-tabs">
         {TABS.map(tab => (
           <button
             key={tab.value}
             onClick={() => setActiveTab(tab.value)}
-            style={{
-              fontWeight: activeTab === tab.value ? 'bold' : 'normal',
-              marginRight: '0.5em'
-            }}
+            className={activeTab === tab.value ? 'active' : ''}
           >
             {tab.label}
           </button>
@@ -163,21 +145,11 @@ const MyAnimeList = () => {
       {filteredRecords.length === 0 ? (
         <p>No anime found in this category.</p>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+        <table className="my-anime-list-table">
           <thead>
-            <tr style={{ borderBottom: '2px solid #ccc' }}>
+            <tr>
               {['#', 'MAL ID', 'Anime Name', 'Status', 'Rating', 'Episodes Watched', 'Actions'].map((heading, i) => (
-                <th
-                  key={i}
-                  style={{
-                    textAlign: 'left',
-                    padding: '0.5em',
-                    verticalAlign: 'top',
-                    wordWrap: 'break-word'
-                  }}
-                >
-                  {heading}
-                </th>
+                <th key={i}>{heading}</th>
               ))}
             </tr>
           </thead>
@@ -185,19 +157,15 @@ const MyAnimeList = () => {
             {filteredRecords.map((rec, idx) => {
               const isEditing = editingId === rec.id;
               return (
-                <tr
-                  key={rec.id}
-                  style={{ borderBottom: '1px solid #ccc', cursor: 'pointer' }}
-                  onClick={(e) => handleRowClick(e, rec)}
-                >
-                  <td style={{ padding: '0.5em' }}>{idx + 1}</td>
-                  <td style={{ padding: '0.5em' }}>
+                <tr key={rec.id} onClick={(e) => handleRowClick(e, rec)}>
+                  <td>{idx + 1}</td>
+                  <td>
                     <Link to={`/anime/${rec.malId}`} onClick={(e) => e.stopPropagation()}>
                       {rec.malId}
                     </Link>
                   </td>
-                  <td style={{ padding: '0.5em' }}>{animeNames[rec.malId] || 'Unknown Title'}</td>
-                  <td style={{ padding: '0.5em' }}>
+                  <td>{animeNames[rec.malId] || 'Unknown Title'}</td>
+                  <td>
                     {isEditing ? (
                       <select
                         name="status"
@@ -217,7 +185,7 @@ const MyAnimeList = () => {
                       rec.status || 'N/A'
                     )}
                   </td>
-                  <td style={{ padding: '0.5em' }}>
+                  <td>
                     {isEditing ? (
                       <input
                         type="number"
@@ -234,7 +202,7 @@ const MyAnimeList = () => {
                       rec.rating ?? 'Not rated'
                     )}
                   </td>
-                  <td style={{ padding: '0.5em' }}>
+                  <td>
                     {isEditing ? (
                       <input
                         type="number"
@@ -249,7 +217,7 @@ const MyAnimeList = () => {
                       rec.episodesWatched ?? 'N/A'
                     )}
                   </td>
-                  <td style={{ padding: '0.5em' }}>
+                  <td>
                     {isEditing ? (
                       <>
                         <button onClick={() => handleSave(rec.id)}>Save</button>
@@ -261,11 +229,11 @@ const MyAnimeList = () => {
                       <>
                         <button onClick={(e) => { e.stopPropagation(); handleEditClick(rec); }}>Edit</button>
                         <button
+                          className="delete-btn"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(rec.id);
                           }}
-                          style={{ marginLeft: '0.5em', color: 'red' }}
                         >
                           Delete
                         </button>

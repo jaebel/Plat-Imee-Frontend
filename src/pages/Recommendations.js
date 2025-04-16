@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { handleAddToList } from '../utils/handleAddToList';
 import { handleViewDetails } from '../utils/handleViewDetails';
+import '../styles/Recommendations.css';
 
 const Recommendations = () => {
   const { user } = useContext(AuthContext);
@@ -49,10 +50,10 @@ const Recommendations = () => {
   };
 
   return (
-    <div style={{ padding: '1em' }}>
-      <h1>Recommendations</h1>
+    <div className="rec-page-container">
+      <h1 className="rec-title">Recommendations</h1>
 
-      <label>
+      <label className="rec-checkbox-label">
         <input
           type="checkbox"
           checked={safeSearch}
@@ -61,44 +62,48 @@ const Recommendations = () => {
         Enable Safe Search
       </label>
 
-      <br /><br />
-      <button onClick={fetchRecommendations}>Generate Recommendations</button>
+      <button className="rec-generate-btn" onClick={fetchRecommendations}>
+        Generate Recommendations
+      </button>
 
-      {loading && <p>Loading recommendations...</p>}
-      {error && <div style={{ color: 'red' }}>{error}</div>}
+      {loading && <p className="rec-loading">Loading recommendations...</p>}
+      {error && <p className="rec-error">{error}</p>}
 
       {!loading && recommendations.length === 0 && (
-        <p>No recommendations available yet. Click the button above to generate some!</p>
+        <p className="rec-empty">No recommendations available yet. Click the button above to generate some!</p>
       )}
 
       {!loading && recommendations.length > 0 && (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+        <ul className="rec-anime-list">
           {recommendations.map(anime => (
-            <li key={anime.mal_id} style={{ marginBottom: '2em', borderBottom: '1px solid #ccc', paddingBottom: '1em' }}>
-              <h2>{anime.title_english || anime.title}</h2>
-              {anime.images?.jpg?.image_url && (
-                <img
-                  src={anime.images.jpg.image_url}
-                  alt={anime.title}
-                  style={{ width: '150px', cursor: 'pointer' }}
-                  onClick={() => handleViewDetails(anime, navigate)}
-                />
-              )}
-              <p><strong>Type:</strong> {anime.type || 'Unknown'}</p>
-              <p><strong>Aired:</strong> {anime.aired?.string || 'N/A'}</p>
-              <p><strong>Rating:</strong> {anime.rating || 'N/A'}</p>
+            <li key={anime.mal_id} className="rec-anime-item">
+              <img
+                src={anime.images?.jpg?.image_url}
+                alt={anime.title}
+                className="rec-anime-image"
+                onClick={() => handleViewDetails(anime, navigate)}
+              />
+              <div className="rec-anime-info">
+                <h2 className="rec-anime-title">{anime.title_english || anime.title}</h2>
+                <p><strong>Type:</strong> {anime.type || 'Unknown'}</p>
+                <p><strong>Aired:</strong> {anime.aired?.string || 'N/A'}</p>
+                <p><strong>Rating:</strong> {anime.rating || 'N/A'}</p>
 
-              {messages[anime.mal_id] && (
-                <p style={{
-                  color: messages[anime.mal_id].includes('added') ? 'green' : 'red',
-                  marginBottom: '0.5em'
-                }}>
-                  {messages[anime.mal_id]}
-                </p>
-              )}
+                {messages[anime.mal_id] && (
+                  <p className={`rec-message ${messages[anime.mal_id].includes('added') ? 'rec-success' : 'rec-fail'}`}>
+                    {messages[anime.mal_id]}
+                  </p>
+                )}
 
-              <button onClick={() => handleAddToList(anime.mal_id, user, setMessages)}>Add to My List</button>
-              <button style={{ marginLeft: '0.5em' }} onClick={() => handleViewDetails(anime, navigate)}>View Details</button>
+                <div className="rec-anime-actions">
+                  <button onClick={() => handleAddToList(anime.mal_id, user, setMessages)}>
+                    Add to My List
+                  </button>
+                  <button onClick={() => handleViewDetails(anime, navigate)}>
+                    View Details
+                  </button>
+                </div>
+              </div>
             </li>
           ))}
         </ul>

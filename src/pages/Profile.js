@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import '../styles/Profile.css';
 
 const Profile = () => {
   const { token } = useContext(AuthContext);
@@ -22,7 +23,6 @@ const Profile = () => {
       }
     };
 
-    // Only fetch if a token exists
     if (token) {
       fetchProfile();
     } else {
@@ -30,22 +30,21 @@ const Profile = () => {
     }
   }, [token]);
 
-  if (loading) return <div>Loading profile...</div>;
-  if (error) return <div style={{ color: 'red' }}>{error}</div>;
+  if (loading) return <div className="profile-container">Loading profile...</div>;
+  if (error) return <div className="profile-container" style={{ color: 'red' }}>{error}</div>;
 
   return (
-    <div style={{ padding: '1em' }}>
+    <div className="profile-container">
       <h1>Profile</h1>
       {profile ? (
-        <div>
+        <div className="profile-info">
           <p><strong>Username:</strong> {profile.username}</p>
           <p><strong>Email:</strong> {profile.email}</p>
           <p><strong>First Name:</strong> {profile.first_name}</p>
           <p><strong>Last Name:</strong> {profile.last_name}</p>
 
-          {/* Edit Profile Button */}
-          <div style={{ marginTop: '1em' }}>
-            <Link to="/edit-profile">Edit Profile</Link>
+          <div>
+            <Link to="/edit-profile" className="profile-edit-link">Edit Profile</Link>
           </div>
         </div>
       ) : (
