@@ -44,33 +44,35 @@ const SignUp = () => {
   };
 
   return (
-    <div className="signup-container">
-      <h1>Sign Up</h1>
-      {error && <div className="error">{error}</div>}
-      {success && <div className="success">{success}</div>}
-      <form onSubmit={handleSubmit}>
-        <label>
-          Username:
-          <input type="text" name="username" value={form.username} onChange={handleChange} required />
-        </label>
-        <label>
-          Email:
-          <input type="email" name="email" value={form.email} onChange={handleChange} required />
-        </label>
-        <label>
-          First Name:
-          <input type="text" name="firstName" value={form.firstName} onChange={handleChange} required />
-        </label>
-        <label>
-          Last Name:
-          <input type="text" name="lastName" value={form.lastName} onChange={handleChange} required />
-        </label>
-        <label>
-          Password:
-          <input type="password" name="password" value={form.password} onChange={handleChange} required />
-        </label>
-        <button type="submit">Register</button>
-      </form>
+    <div className="signup-page">
+      <div className="signup-container">
+        <h1>Sign Up</h1>
+        {error && <div className="error">{error}</div>}
+        {success && <div className="success">{success}</div>}
+        <form onSubmit={handleSubmit}>
+          <label>
+            Username:
+            <input type="text" name="username" value={form.username} onChange={handleChange} required />
+          </label>
+          <label>
+            Email:
+            <input type="email" name="email" value={form.email} onChange={handleChange} required />
+          </label>
+          <label>
+            First Name:
+            <input type="text" name="firstName" value={form.firstName} onChange={handleChange} required />
+          </label>
+          <label>
+            Last Name:
+            <input type="text" name="lastName" value={form.lastName} onChange={handleChange} required />
+          </label>
+          <label>
+            Password:
+            <input type="password" name="password" value={form.password} onChange={handleChange} required />
+          </label>
+          <button type="submit">Register</button>
+        </form>
+      </div>
     </div>
   );
 };

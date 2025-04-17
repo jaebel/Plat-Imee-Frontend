@@ -1,6 +1,6 @@
 .rec-page-container {
     padding: 2em 5%;
-    background-color: #181818;
+    background-color: #1a2025;
     color: #f0f0f0;
     font-family: 'Segoe UI', sans-serif;
   }
@@ -23,8 +23,8 @@
   .rec-generate-btn {
     display: block;
     margin: 1em 0 2em;
-    background-color: #007acc;
-    color: white;
+    background-color: #DEB8B8;
+    color: rgb(0, 0, 0);
     border: none;
     padding: 0.6em 1.2em;
     border-radius: 4px;
@@ -34,7 +34,8 @@
   }
   
   .rec-generate-btn:hover {
-    background-color: #005fa3;
+    background-color: #867070;
+    color: white;
   }
   
   .rec-anime-list {
@@ -78,7 +79,7 @@
   }
   
   .rec-anime-actions button {
-    background-color: #4caf50;
+    background-color: #a18787;
     color: white;
     border: none;
     padding: 0.5em 1em;
@@ -89,7 +90,7 @@
   }
   
   .rec-anime-actions button:hover {
-    background-color: #3e8e41;
+    background-color: #5e4e4e;
   }
   
   .rec-message.rec-success {

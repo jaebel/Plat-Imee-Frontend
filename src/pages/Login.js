@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
-import '../styles/SignUp.css'; // Reuse the same styles for consistency
+import '../styles/SignUp.css'; // Reusing the same styles
 
 const Login = () => {
   const navigate = useNavigate();
@@ -41,34 +41,36 @@ const Login = () => {
   };
 
   return (
-    <div className="signup-container">
-      <h1>Login</h1>
-      {error && <div className="error">{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <label>
-          Username:
-          <input
-            type="text"
-            name="username"
-            value={form.username}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label>
-          Password:
-          <input
-            type="password"
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <button type="submit" disabled={loading}>
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
+    <div className="signup-page">
+      <div className="signup-container">
+        <h1>Login</h1>
+        {error && <div className="error">{error}</div>}
+        <form onSubmit={handleSubmit}>
+          <label>
+            Username:
+            <input
+              type="text"
+              name="username"
+              value={form.username}
+              onChange={handleChange}
+              required
+            />
+          </label>
+          <label>
+            Password:
+            <input
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+          </label>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

@@ -30,26 +30,28 @@ const Profile = () => {
     }
   }, [token]);
 
-  if (loading) return <div className="profile-container">Loading profile...</div>;
-  if (error) return <div className="profile-container" style={{ color: 'red' }}>{error}</div>;
+  if (loading) return <div className="profile-page"><div className="profile-container">Loading profile...</div></div>;
+  if (error) return <div className="profile-page"><div className="profile-container" style={{ color: 'red' }}>{error}</div></div>;
 
   return (
-    <div className="profile-container">
-      <h1>Profile</h1>
-      {profile ? (
-        <div className="profile-info">
-          <p><strong>Username:</strong> {profile.username}</p>
-          <p><strong>Email:</strong> {profile.email}</p>
-          <p><strong>First Name:</strong> {profile.first_name}</p>
-          <p><strong>Last Name:</strong> {profile.last_name}</p>
+    <div className="profile-page">
+      <div className="profile-container">
+        <h1>Profile</h1>
+        {profile ? (
+          <div className="profile-info">
+            <p><strong>Username:</strong> {profile.username}</p>
+            <p><strong>Email:</strong> {profile.email}</p>
+            <p><strong>First Name:</strong> {profile.first_name}</p>
+            <p><strong>Last Name:</strong> {profile.last_name}</p>
 
-          <div>
-            <Link to="/edit-profile" className="profile-edit-link">Edit Profile</Link>
+            <div>
+              <Link to="/edit-profile" className="profile-edit-link">Edit Profile</Link>
+            </div>
           </div>
-        </div>
-      ) : (
-        <p>No profile data available.</p>
-      )}
+        ) : (
+          <p>No profile data available.</p>
+        )}
+      </div>
     </div>
   );
 };

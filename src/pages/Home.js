@@ -1,14 +1,12 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/Home.css';
-import { AuthContext } from '../context/AuthContext';
 import { handleViewDetails } from '../utils/handleViewDetails';
 
 const Home = () => {
   const [seasonalAnime, setSeasonalAnime] = useState([]);
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     axios.get('https://api.jikan.moe/v4/seasons/now')
@@ -51,7 +49,7 @@ const Home = () => {
               <p
                 className="anime-title"
                 onClick={() => handleViewDetails(anime, navigate)}
-                style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                style={{ cursor: 'pointer', color: 'black' }}
               >
                 {anime.title_english || anime.title}
               </p>

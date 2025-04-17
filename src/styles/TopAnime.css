@@ -1,6 +1,6 @@
 .top-anime-container {
     padding: 2em 5%;
-    background-color: #121212;
+    background-color: #1a2025;
     color: #ffffff;
     font-family: 'Segoe UI', sans-serif;
 }
@@ -30,7 +30,7 @@
     padding: 1em;
     border: 1px solid #333;
     border-radius: 6px;
-    background-color: #1a1a1a;
+    background-color: #36454F;
     min-height: 150px;
 }
 
@@ -75,7 +75,7 @@
 }
 
 .anime-actions button {
-    background-color: #6e5151;
+    background-color: #a18787;
     color: white;
     border: none;
     padding: 0.5em 1.2em;
@@ -92,7 +92,7 @@
 
 
 .anime-actions button:hover {
-    background-color: #3d5a73;
+    background-color: #5e4e4e;
 }
 
 .message {
