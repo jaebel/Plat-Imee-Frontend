@@ -35,7 +35,6 @@ function App() {
           <Route path="/upcoming" element={<UpcomingAnime />} />
           <Route path="/genre-picker" element={<GenrePicker />} />
           <Route path="/genre-results" element={<GenreResults />} />
-          <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/anime" element={<AnimeList />} />
           <Route path="/all-anime" element={<AllAnime />} />
           <Route path="/seasonal" element={<SeasonalAnime />} />
@@ -46,6 +45,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Profile />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/edit-profile" 
+            element={
+              <PrivateRoute>
+                <EditProfile />
               </PrivateRoute>
             } 
           />

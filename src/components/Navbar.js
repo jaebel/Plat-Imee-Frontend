@@ -18,7 +18,6 @@ const Navbar = () => {
     return (
         <div className="navbar-border">
             <nav className="navbar-container">
-                {/* Left: Logo + Search */}
                 <div className="navbar-left">
                     <NavLink to="/" className="navbar-logo">Plat-Imee</NavLink>
                     <form onSubmit={handleSearch} className="navbar-search-form">
@@ -27,12 +26,10 @@ const Navbar = () => {
                     </form>
                 </div>
 
-                {/* Center: My Anime List */}
                 <div className="navbar-center">
                     {token && <NavLink to="/my-anime" className="navbar-link">My Anime List</NavLink>}
                 </div>
 
-                {/* Right: Auth Controls */}
                 <div className="navbar-right">
                     {token ? (
                         <>

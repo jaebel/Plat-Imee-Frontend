@@ -70,7 +70,6 @@ const TopAnime = () => {
                 </p>
               )}
 
-              {/* ✅ Properly styled button block */}
               <div className="anime-actions">
                 <button onClick={() => handleAddToList(anime.mal_id, user, setMessages)}>
                   Add to My List

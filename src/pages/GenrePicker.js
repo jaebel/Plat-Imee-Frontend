@@ -106,7 +106,7 @@ const GenrePicker = () => {
   return (
     <div className="genre-picker-container">
       <h1>Browse Anime by Genre</h1>
-      <p>Select one or more genres, then click "Search".</p>
+      <p>Select one or more genres, then click 'Search'.</p>
 
       <div className="genre-grid">
         {JIKAN_GENRE_OPTIONS.map(opt => (

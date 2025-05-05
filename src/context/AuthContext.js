@@ -1,4 +1,3 @@
-// AuthContext.js
 import React, { createContext, useState, useEffect } from 'react';
 
 // Create a context with default values
@@ -6,7 +5,7 @@ export const AuthContext = createContext({
   token: null,          // JWT token
   user: null,           // Object with user info, e.g. { userId, username, email }
   login: () => {},      // Function to log in
-  logout: () => {}      // Function to log out
+  logout: () => {}      // Func to log out
 });
 
 export const AuthProvider = ({ children }) => {
@@ -35,13 +34,11 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]);
 
-  // Define a function to log in
   const login = (newToken, userData) => {
     setToken(newToken);
     setUser(userData);
   };
 
-  // Define a function to log out
   const logout = () => {
     setToken(null);
     setUser(null);

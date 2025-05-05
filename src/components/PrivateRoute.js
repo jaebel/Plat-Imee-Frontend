@@ -6,7 +6,7 @@ const PrivateRoute = ({ children }) => {
   // Use AuthContext to get the current token
   const { token } = useContext(AuthContext);
 
-  // If token is not present, redirect to login
+  // If token is not present - redirect to login
   if (!token) {
     return <Navigate to="/login" replace />;
   }

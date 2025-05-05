@@ -8,7 +8,7 @@ const AnimeList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // useEffect to fetch the anime data when the component mounts
+  // useEffect to fetch the anime data
   useEffect(() => {
     // Fetch all anime using the backend endpoint
     axiosInstance.get('/anime')
@@ -23,7 +23,6 @@ const AnimeList = () => {
       });
   }, []);
 
-  // Display a loading message while data is being fetched
   if (loading) return <div>Loading anime...</div>;
   // Display an error message if fetching fails
   if (error) return <div style={{ color: 'red' }}>{error}</div>;
@@ -33,9 +32,8 @@ const AnimeList = () => {
       <h1>Anime List</h1>
       <ul>
         {animeList.map(anime => (
-          // Use malId as the key and in the link since malId is now the primary key
+          // Use malId as the key and in the link
           <li key={anime.malId}>
-            {/* Wrap anime name in Link so users can navigate to details page using malId */}
             <Link to={`/anime/${anime.malId}`}>
               <h2>{anime.name}</h2>
             </Link>
