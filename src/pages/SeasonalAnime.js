@@ -33,7 +33,7 @@ const SeasonalAnime = () => {
         setError('Failed to fetch seasonal anime.');
         setLoading(false);
       });
-  }, [location.search]);
+  }, [location.search, page]);
 
   return (
     <div className="top-anime-container">

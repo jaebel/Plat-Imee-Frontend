@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8080/api/v1'
+  // baseURL: 'http://localhost:8080/api/v1'
+  baseURL: 'https://plat-imee-backend.onrender.com/api/v1'
 });
 
 // Attach token to the Authorization header for each request
