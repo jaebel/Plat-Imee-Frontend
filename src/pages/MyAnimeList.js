@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { useAnimeList } from '../context/AnimeListContext';
 import axiosInstance from '../api/axiosInstance';
 import { Link } from 'react-router-dom';
 import '../styles/MyAnimeList.css';
@@ -15,9 +16,15 @@ const TABS = [
 
 const MyAnimeList = () => {
     const { user } = useContext(AuthContext);
+    const {
+        records,
+        setRecords,
+        animeNames,
+        setAnimeNames,
+        episodeCounts,
+        setEpisodeCounts
+    } = useAnimeList();
 
-    const [records, setRecords] = useState([]);
-    const [animeNames, setAnimeNames] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('ALL');
@@ -34,24 +41,35 @@ const MyAnimeList = () => {
             setLoading(false);
             return;
         }
-
+    
+        if (records !== null) {
+            console.log('⏩ Skipping fetch: using cached records');
+            setLoading(false); // cached data exists
+            return;
+        }
+    
+        console.log('⏳ Fetching anime list from backend...');
         axiosInstance.get(`/user-anime?userId=${user.userId}`)
             .then(async res => {
                 const userRecords = res.data;
                 setRecords(userRecords);
                 const malIds = [...new Set(userRecords.map(r => r.malId))];
                 const nameMap = {};
-
+                const episodeMap = {};
+    
                 await Promise.all(malIds.map(async (malId) => {
                     try {
                         const response = await axiosInstance.get(`/anime/${malId}`);
                         nameMap[malId] = response.data.name || 'Unknown Title';
+                        episodeMap[malId] = response.data.episodes ?? null;
                     } catch {
                         nameMap[malId] = 'Unknown Title';
+                        episodeMap[malId] = null;
                     }
                 }));
-
+    
                 setAnimeNames(nameMap);
+                setEpisodeCounts(episodeMap);
                 setLoading(false);
             })
             .catch(err => {
@@ -59,11 +77,12 @@ const MyAnimeList = () => {
                 setError('Error fetching your anime list.');
                 setLoading(false);
             });
-    }, [user]);
+    }, [user, records, setRecords, setAnimeNames, setEpisodeCounts]);
+    
 
     const filteredRecords = activeTab === 'ALL'
-        ? records
-        : records.filter(rec => rec.status === activeTab);
+        ? records || []
+        : (records || []).filter(rec => rec.status === activeTab);
 
     const handleEditClick = (record) => {
         setEditingId(record.id);
@@ -205,15 +224,22 @@ const MyAnimeList = () => {
                                         </td>
                                         <td>
                                             {isEditing ? (
-                                                <input
-                                                    type="number"
-                                                    name="episodesWatched"
-                                                    min="0"
-                                                    value={editData.episodesWatched}
-                                                    onChange={handleEditChange}
-                                                    onKeyDown={(e) => e.key === 'Enter' && handleSave(rec.id)}
-                                                    placeholder="0"
-                                                />
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5em' }}>
+                                                    <input
+                                                        type="number"
+                                                        name="episodesWatched"
+                                                        min="0"
+                                                        max={episodeCounts[rec.malId] || undefined}
+                                                        value={editData.episodesWatched}
+                                                        onChange={handleEditChange}
+                                                        onKeyDown={(e) => e.key === 'Enter' && handleSave(rec.id)}
+                                                        placeholder="0"
+                                                        style={{ width: '70px' }}
+                                                    />
+                                                    <span style={{ fontSize: '0.85rem', color: '#ccc' }}>
+                                                        Max: {episodeCounts[rec.malId] ?? 'Unknown'}
+                                                    </span>
+                                                </div>
                                             ) : (
                                                 rec.episodesWatched ?? 'N/A'
                                             )}
