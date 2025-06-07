@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import { useAnimeList } from '../context/AnimeListContext';
 import { handleViewDetails } from '../utils/handleViewDetails';
 import { handleAddToList } from '../utils/handleAddToList';
 import '../styles/TopAnime.css'; // Shared styling
@@ -15,8 +16,10 @@ const SearchAnime = () => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [messages, setMessages] = useState({});
 
   const { user } = useContext(AuthContext);
+  const { setRecords } = useAnimeList(); // ✅ needed for forcing MyAnimeList refresh
 
   useEffect(() => {
     if (!query.trim()) return;
@@ -75,8 +78,14 @@ const SearchAnime = () => {
                 <p><strong>Aired:</strong> {item.aired?.string || 'Unknown'}</p>
                 <p><strong>Rating:</strong> {item.score ?? 'N/A'}</p>
 
+                {messages[item.mal_id] && (
+                  <p className={`message ${messages[item.mal_id].includes('added') ? 'success' : 'fail'}`}>
+                    {messages[item.mal_id]}
+                  </p>
+                )}
+
                 <div className="anime-actions">
-                  <button onClick={() => handleAddToList(item.mal_id, user)}>
+                  <button onClick={() => handleAddToList(item.mal_id, user, setMessages, setRecords)}>
                     Add to My List
                   </button>
                   <button onClick={() => handleViewDetails(item, navigate)}>

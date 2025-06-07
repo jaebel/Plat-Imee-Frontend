@@ -35,28 +35,23 @@ const MyAnimeList = () => {
         episodesWatched: ''
     });
 
+    // Always fetch fresh on mount
     useEffect(() => {
         if (!user || !user.userId) {
             setError('No user logged in.');
             setLoading(false);
             return;
         }
-    
-        if (records !== null) {
-            console.log('⏩ Skipping fetch: using cached records');
-            setLoading(false); // cached data exists
-            return;
-        }
-    
-        console.log('⏳ Fetching anime list from backend...');
-        axiosInstance.get(`/user-anime?userId=${user.userId}`)
+
+        console.log('Forcing re-fetch of anime list from backend...');
+        axiosInstance.get(`/user-anime/me`)
             .then(async res => {
                 const userRecords = res.data;
                 setRecords(userRecords);
                 const malIds = [...new Set(userRecords.map(r => r.malId))];
                 const nameMap = {};
                 const episodeMap = {};
-    
+
                 await Promise.all(malIds.map(async (malId) => {
                     try {
                         const response = await axiosInstance.get(`/anime/${malId}`);
@@ -67,7 +62,7 @@ const MyAnimeList = () => {
                         episodeMap[malId] = null;
                     }
                 }));
-    
+
                 setAnimeNames(nameMap);
                 setEpisodeCounts(episodeMap);
                 setLoading(false);
@@ -77,8 +72,7 @@ const MyAnimeList = () => {
                 setError('Error fetching your anime list.');
                 setLoading(false);
             });
-    }, [user, records, setRecords, setAnimeNames, setEpisodeCounts]);
-    
+    }, [user, setRecords, setAnimeNames, setEpisodeCounts]);
 
     const filteredRecords = activeTab === 'ALL'
         ? records || []

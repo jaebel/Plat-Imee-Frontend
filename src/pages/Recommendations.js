@@ -1,8 +1,8 @@
 import React, { useState, useContext } from 'react';
+import axios from 'axios';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { handleAddToList } from '../utils/handleAddToList';
 import { handleViewDetails } from '../utils/handleViewDetails';
 import '../styles/Recommendations.css';
@@ -17,6 +17,31 @@ const Recommendations = () => {
   const [error, setError] = useState('');
   const [messages, setMessages] = useState({});
 
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const fetchInBatches = async (ids, batchSize = 5, delayMs = 400) => {
+    const results = [];
+
+    for (let i = 0; i < ids.length; i += batchSize) {
+      const batch = ids.slice(i, i + batchSize);
+      const responses = await Promise.all(
+        batch.map(async (id) => {
+          try {
+            const res = await axios.get(`https://api.jikan.moe/v4/anime/${id}`);
+            return res.data.data;
+          } catch (err) {
+            console.warn(`Jikan API failed for mal_id ${id}:`, err.message);
+            return null;
+          }
+        })
+      );
+      results.push(...responses.filter(Boolean));
+      await delay(delayMs); // Pause to avoid rate limiting
+    }
+
+    return results;
+  };
+
   const fetchRecommendations = async () => {
     if (!user || !user.userId) return;
 
@@ -28,19 +53,9 @@ const Recommendations = () => {
       });
 
       const ids = response.data.map(rec => rec.mal_id);
+      const fetchedDetails = await fetchInBatches(ids);
 
-      const fetchedDetails = await Promise.all(
-        ids.map(async (id) => {
-          try {
-            const res = await axios.get(`https://api.jikan.moe/v4/anime/${id}`);
-            return res.data.data;
-          } catch {
-            return null;
-          }
-        })
-      );
-
-      setRecommendations(fetchedDetails.filter(item => item !== null));
+      setRecommendations(fetchedDetails);
     } catch (err) {
       console.error(err);
       setError('Error fetching recommendations.');

@@ -5,8 +5,10 @@ import axiosInstance from '../api/axiosInstance';
  * @param {number} malId - The MyAnimeList ID of the anime.
  * @param {object} user - The current logged-in user.
  * @param {function} setMessages - State setter for displaying feedback.
+ * @param {function} setRecords - Setter for updating the cached records.
+ * @param {array} records - The current cached records.
  */
-export async function handleAddToList(malId, user, setMessages) {
+export async function handleAddToList(malId, user, setMessages, setRecords, records) {
   const newMessages = {};
 
   if (!user || !user.userId) {
@@ -16,11 +18,15 @@ export async function handleAddToList(malId, user, setMessages) {
   }
 
   try {
-    await axiosInstance.post('/user-anime', {
+    const res = await axiosInstance.post('/user-anime', {
       userId: user.userId,
       malId: malId,
     });
+
+    const newRecord = res.data;
     newMessages[malId] = 'Anime added to your list!';
+
+    setRecords(prev => [...(prev || []), newRecord]); // 👈 Update cache directly
   } catch (err) {
     console.error('Error adding anime:', err);
     newMessages[malId] = 'Failed to add anime.';

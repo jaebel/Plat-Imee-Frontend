@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import { useAnimeList } from '../context/AnimeListContext';
 import { useNavigate } from 'react-router-dom';
 import { handleViewDetails } from '../utils/handleViewDetails';
 import { handleAddToList } from '../utils/handleAddToList';
@@ -8,6 +9,7 @@ import '../styles/TopAnime.css'; // Reuse shared stylesheet
 
 const AllAnime = () => {
   const { user } = useContext(AuthContext);
+  const { setRecords } = useAnimeList(); // ✅ include cache setter
   const navigate = useNavigate();
 
   const [animeList, setAnimeList] = useState([]);
@@ -46,7 +48,6 @@ const AllAnime = () => {
         <ul className="anime-list">
           {animeList.map(anime => (
             <li key={anime.mal_id} className="anime-item">
-              {/* Invisible rank to preserve layout structure */}
               <div className="anime-rank" style={{ visibility: 'hidden' }}>•</div>
 
               <img
@@ -69,7 +70,7 @@ const AllAnime = () => {
                 )}
 
                 <div className="anime-actions">
-                  <button onClick={() => handleAddToList(anime.mal_id, user, setMessages)}>
+                  <button onClick={() => handleAddToList(anime.mal_id, user, setMessages, setRecords)}>
                     Add to My List
                   </button>
                   <button onClick={() => handleViewDetails(anime, navigate)}>

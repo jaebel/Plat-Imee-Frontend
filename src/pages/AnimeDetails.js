@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
+import { useAnimeList } from '../context/AnimeListContext';
 import JikanService from '../services/JikanService';
 import { handleAddToList } from '../utils/handleAddToList';
 import '../styles/AnimeDetails.css';
@@ -16,6 +17,7 @@ const AnimeDetails = () => {
   const [showLoginMessage, setShowLoginMessage] = useState(false);
 
   const { user } = useContext(AuthContext);
+  const { setRecords } = useAnimeList(); // ✅ get cache resetter
 
   useEffect(() => {
     axiosInstance.get(`/anime/${id}`)
@@ -50,7 +52,7 @@ const AnimeDetails = () => {
     }
 
     try {
-      await handleAddToList(anime.malId, user, () => {});
+      await handleAddToList(anime.malId, user, () => {}, setRecords); // ✅ pass setRecords
       setButtonText('Added');
     } catch (err) {
       setButtonText('Error');
@@ -78,7 +80,7 @@ const AnimeDetails = () => {
       {jikanData && (
         <div>
           <h2>Additional Info from Jikan</h2>
-          {jikanData.images && jikanData.images.jpg && (
+          {jikanData.images?.jpg?.image_url && (
             <img src={jikanData.images.jpg.image_url} alt="Anime" className="anime-details-image" />
           )}
           <p className="anime-details-synopsis"><strong>Synopsis:</strong> {jikanData.synopsis}</p>

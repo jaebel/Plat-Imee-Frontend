@@ -2,12 +2,14 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { useAnimeList } from '../context/AnimeListContext';
 import { handleViewDetails } from '../utils/handleViewDetails';
 import { handleAddToList } from '../utils/handleAddToList';
 import '../styles/TopAnime.css'; // Reuse shared styling
 
 const SeasonalAnime = () => {
   const { user } = useContext(AuthContext);
+  const { setRecords } = useAnimeList(); // ✅ for cache invalidation
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -70,7 +72,7 @@ const SeasonalAnime = () => {
               )}
 
               <div className="anime-actions">
-                <button onClick={() => handleAddToList(anime.mal_id, user, setMessages)}>
+                <button onClick={() => handleAddToList(anime.mal_id, user, setMessages, setRecords)}>
                   Add to My List
                 </button>
                 <button onClick={() => handleViewDetails(anime, navigate)}>
