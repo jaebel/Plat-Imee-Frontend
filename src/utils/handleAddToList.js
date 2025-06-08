@@ -6,10 +6,10 @@ import axiosInstance from '../api/axiosInstance';
  * @param {object} user - The current logged-in user.
  * @param {function} setMessages - State setter for displaying feedback.
  */
-export async function handleAddToList(malId, user, setMessages) {
+export async function handleAddToList(malId, user, setMessages, setRecords) {
   const newMessages = {};
 
-  if (!user) {
+  if (!user || !user.userId) {
     newMessages[malId] = 'You must be logged in to add anime to your list.';
     setMessages(prev => ({ ...prev, ...newMessages }));
     return;
@@ -17,9 +17,11 @@ export async function handleAddToList(malId, user, setMessages) {
 
   try {
     await axiosInstance.post('/user-anime', {
+      userId: user.userId,
       malId: malId,
     });
     newMessages[malId] = 'Anime added to your list!';
+    setRecords(null); // ❗Force MyAnimeList to re-fetch
   } catch (err) {
     console.error('Error adding anime:', err);
     newMessages[malId] = 'Failed to add anime.';

@@ -6,30 +6,54 @@ const AnimeListContext = createContext();
 export const AnimeListProvider = ({ children }) => {
     const { user } = useContext(AuthContext);
 
-    const [records, setRecords] = useState(null);
-    const [animeNames, setAnimeNames] = useState({});
-    const [episodeCounts, setEpisodeCounts] = useState({});
-    const [cachedUserId, setCachedUserId] = useState(null); // ⬅️ New
+    const [userAnimeCache, setUserAnimeCache] = useState({}); // { [userId]: { records, animeNames, episodeCounts } }
 
-    useEffect(() => {
-        if (!user?.userId || user.userId !== cachedUserId) {
-            // Reset cache if logged out or user changed
-            setRecords(null);
-            setAnimeNames({});
-            setEpisodeCounts({});
-            setCachedUserId(user?.userId || null);
-        }
-    }, [user?.userId, cachedUserId]);
+    const currentUserId = user?.userId;
+
+    const setRecords = (newRecords) => {
+        if (!currentUserId) return;
+        setUserAnimeCache(prev => ({
+            ...prev,
+            [currentUserId]: {
+                ...(prev[currentUserId] || {}),
+                records: newRecords
+            }
+        }));
+    };
+
+    const setAnimeNames = (names) => {
+        if (!currentUserId) return;
+        setUserAnimeCache(prev => ({
+            ...prev,
+            [currentUserId]: {
+                ...(prev[currentUserId] || {}),
+                animeNames: names
+            }
+        }));
+    };
+
+    const setEpisodeCounts = (counts) => {
+        if (!currentUserId) return;
+        setUserAnimeCache(prev => ({
+            ...prev,
+            [currentUserId]: {
+                ...(prev[currentUserId] || {}),
+                episodeCounts: counts
+            }
+        }));
+    };
+
+    const value = {
+        records: currentUserId ? userAnimeCache[currentUserId]?.records || null : null,
+        animeNames: currentUserId ? userAnimeCache[currentUserId]?.animeNames || {} : {},
+        episodeCounts: currentUserId ? userAnimeCache[currentUserId]?.episodeCounts || {} : {},
+        setRecords,
+        setAnimeNames,
+        setEpisodeCounts
+    };
 
     return (
-        <AnimeListContext.Provider value={{
-            records,
-            setRecords,
-            animeNames,
-            setAnimeNames,
-            episodeCounts,
-            setEpisodeCounts
-        }}>
+        <AnimeListContext.Provider value={value}>
             {children}
         </AnimeListContext.Provider>
     );
