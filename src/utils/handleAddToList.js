@@ -9,7 +9,7 @@ import axiosInstance from '../api/axiosInstance';
 export async function handleAddToList(malId, user, setMessages) {
   const newMessages = {};
 
-  if (!user || !user.userId) {
+  if (!user) {
     newMessages[malId] = 'You must be logged in to add anime to your list.';
     setMessages(prev => ({ ...prev, ...newMessages }));
     return;
@@ -17,7 +17,6 @@ export async function handleAddToList(malId, user, setMessages) {
 
   try {
     await axiosInstance.post('/user-anime', {
-      userId: user.userId,
       malId: malId,
     });
     newMessages[malId] = 'Anime added to your list!';

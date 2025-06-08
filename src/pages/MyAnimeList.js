@@ -49,7 +49,7 @@ const MyAnimeList = () => {
         }
     
         console.log('⏳ Fetching anime list from backend...');
-        axiosInstance.get(`/user-anime?userId=${user.userId}`)
+        axiosInstance.get(`/user-anime/me`)
             .then(async res => {
                 const userRecords = res.data;
                 setRecords(userRecords);
@@ -77,7 +77,7 @@ const MyAnimeList = () => {
                 setError('Error fetching your anime list.');
                 setLoading(false);
             });
-    }, [user, records, setRecords, setAnimeNames, setEpisodeCounts]);
+    }, [user, records, setRecords, setAnimeNames, setEpisodeCounts]);    
     
 
     const filteredRecords = activeTab === 'ALL'
