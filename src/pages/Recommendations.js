@@ -3,6 +3,7 @@ import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAnimeList } from '../context/AnimeListContext';
 import { handleAddToList } from '../utils/handleAddToList';
 import { handleViewDetails } from '../utils/handleViewDetails';
 import '../styles/Recommendations.css';
@@ -10,6 +11,7 @@ import '../styles/Recommendations.css';
 const Recommendations = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { setRecords } = useAnimeList(); // ✅ cache management
 
   const [recommendations, setRecommendations] = useState([]);
   const [safeSearch, setSafeSearch] = useState(true);
@@ -96,7 +98,7 @@ const Recommendations = () => {
                 )}
 
                 <div className="rec-anime-actions">
-                  <button onClick={() => handleAddToList(anime.mal_id, user, setMessages)}>
+                  <button onClick={() => handleAddToList(anime.mal_id, user, setMessages, setRecords)}>
                     Add to My List
                   </button>
                   <button onClick={() => handleViewDetails(anime, navigate)}>

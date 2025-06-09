@@ -2,12 +2,14 @@ import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { useAnimeList } from '../context/AnimeListContext';
 import { handleViewDetails } from '../utils/handleViewDetails';
 import { handleAddToList } from '../utils/handleAddToList';
 import '../styles/TopAnime.css';
 
 const GenreResults = () => {
   const { user } = useContext(AuthContext);
+  const { setRecords } = useAnimeList(); // ✅ used to reset cache
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
@@ -67,7 +69,9 @@ const GenreResults = () => {
               )}
 
               <div className="anime-actions">
-                <button onClick={() => handleAddToList(item.mal_id, user, setMessages)}>Add to My List</button>
+                <button onClick={() => handleAddToList(item.mal_id, user, setMessages, setRecords)}>
+                  Add to My List
+                </button>
                 <button onClick={() => handleViewDetails(item, navigate)}>View Details</button>
               </div>
             </div>
