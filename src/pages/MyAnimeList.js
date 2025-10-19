@@ -31,13 +31,16 @@ const MyAnimeList = () => {
     // Fetch anime list only once per user session
     useEffect(() => {
         if (!user?.userId) return;
-        if (records !== null) { setLoading(false); return; }
+        if (records !== null) {
+            setLoading(false);
+            return;
+        }
 
         const fetchAnimeList = async () => {
             try {
                 setLoading(true);
                 const res = await axiosInstance.get(`/user-anime/me`);
-                const userRecords = res.data;
+                const userRecords = Array.isArray(res.data) ? res.data : [];
                 setRecords(userRecords);
 
                 const malIds = [...new Set(userRecords.map(r => r.malId))];
@@ -45,16 +48,18 @@ const MyAnimeList = () => {
                 const nameMap = {};
                 const episodeMap = {};
 
-                await Promise.all(missingMalIds.map(async (malId) => {
-                    try {
-                        const response = await axiosInstance.get(`/anime/${malId}`);
-                        nameMap[malId] = response.data.name || 'Unknown Title';
-                        episodeMap[malId] = response.data.episodes ?? null;
-                    } catch {
-                        nameMap[malId] = 'Unknown Title';
-                        episodeMap[malId] = null;
-                    }
-                }));
+                await Promise.all(
+                    missingMalIds.map(async (malId) => {
+                        try {
+                            const response = await axiosInstance.get(`/anime/${malId}`);
+                            nameMap[malId] = response.data.name || 'Unknown Title';
+                            episodeMap[malId] = response.data.episodes ?? null;
+                        } catch {
+                            nameMap[malId] = 'Unknown Title';
+                            episodeMap[malId] = null;
+                        }
+                    })
+                );
 
                 setAnimeNames(prev => ({ ...prev, ...nameMap }));
                 setEpisodeCounts(prev => ({ ...prev, ...episodeMap }));
@@ -70,6 +75,7 @@ const MyAnimeList = () => {
         fetchAnimeList();
     }, [user, records, animeNames, setRecords, setAnimeNames, setEpisodeCounts]);
 
+    // Filter records by tab
     const filteredRecords = activeTab === 'ALL'
         ? Array.isArray(records) ? records : []
         : (Array.isArray(records) ? records : []).filter(rec => rec.status === activeTab);
@@ -93,42 +99,40 @@ const MyAnimeList = () => {
         setEditData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSave = (recordId) => {
+    const handleSave = async (recordId) => {
         const payload = {
             status: editData.status || null,
             rating: editData.rating !== '' ? parseFloat(editData.rating) : null,
             episodesWatched: editData.episodesWatched !== '' ? parseInt(editData.episodesWatched, 10) : null
         };
 
-        axiosInstance.patch(`/user-anime/${recordId}`, payload)
-            .then(res => {
-                const updated = res.data;
-                setRecords(prev => {
-                    const current = Array.isArray(prev) ? prev : [];
-                    return current.map(r => (r.id === recordId ? updated : r));
-                });
-                setEditingId(null);
-            })
-            .catch(err => {
-                console.error('Error updating record:', err);
-                alert('Failed to update record.');
+        try {
+            const res = await axiosInstance.patch(`/user-anime/${recordId}`, payload);
+            const updated = res.data;
+            setRecords(prev => {
+                const current = Array.isArray(prev) ? prev : [];
+                return current.map(r => (r.id === recordId ? updated : r));
             });
+            setEditingId(null);
+        } catch (err) {
+            console.error('Error updating record:', err);
+            alert('Failed to update record.');
+        }
     };
 
-    const handleDelete = (recordId) => {
+    const handleDelete = async (recordId) => {
         if (!window.confirm('Are you sure you want to remove this anime from your list?')) return;
 
-        axiosInstance.delete(`/user-anime/${recordId}`)
-            .then(() => {
-                setRecords(prev => {
-                    const current = Array.isArray(prev) ? prev : [];
-                    return current.filter(r => r.id !== recordId);
-                });
-            })
-            .catch(err => {
-                console.error('Error deleting record:', err);
-                alert('Failed to delete record.');
+        try {
+            await axiosInstance.delete(`/user-anime/${recordId}`);
+            setRecords(prev => {
+                const current = Array.isArray(prev) ? prev : [];
+                return current.filter(r => r.id !== recordId);
             });
+        } catch (err) {
+            console.error('Error deleting record:', err);
+            alert('Failed to delete record.');
+        }
     };
 
     const handleRowClick = (e, record) => {
@@ -176,7 +180,11 @@ const MyAnimeList = () => {
                                     <tr key={rec.id} onClick={(e) => handleRowClick(e, rec)}>
                                         <td>{idx + 1}</td>
                                         <td>
-                                            <Link to={`/anime/${rec.malId}`} className="mal-id-link" onClick={(e) => e.stopPropagation()}>
+                                            <Link
+                                                to={`/anime/${rec.malId}`}
+                                                className="mal-id-link"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
                                                 {rec.malId}
                                             </Link>
                                         </td>
@@ -244,7 +252,10 @@ const MyAnimeList = () => {
                                             {isEditing ? (
                                                 <>
                                                     <button onClick={() => handleSave(rec.id)}>Save</button>
-                                                    <button onClick={handleCancelEdit} style={{ marginLeft: '0.5em' }}>
+                                                    <button
+                                                        onClick={handleCancelEdit}
+                                                        style={{ marginLeft: '0.5em' }}
+                                                    >
                                                         Cancel
                                                     </button>
                                                 </>
