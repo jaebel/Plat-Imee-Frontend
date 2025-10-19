@@ -16,24 +16,13 @@ const TABS = [
 
 const MyAnimeList = () => {
     const { user } = useContext(AuthContext);
-    const {
-        records,
-        setRecords,
-        animeNames,
-        setAnimeNames,
-        episodeCounts,
-        setEpisodeCounts
-    } = useAnimeList();
+    const { records, setRecords, animeNames, setAnimeNames, episodeCounts, setEpisodeCounts } = useAnimeList();
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('ALL');
     const [editingId, setEditingId] = useState(null);
-    const [editData, setEditData] = useState({
-        status: '',
-        rating: '',
-        episodesWatched: ''
-    });
+    const [editData, setEditData] = useState({ status: '', rating: '', episodesWatched: '' });
 
     // Fixed useEffect to prevent nonstop requests
     useEffect(() => {
@@ -122,7 +111,7 @@ const MyAnimeList = () => {
         axiosInstance.patch(`/user-anime/${recordId}`, payload)
             .then(res => {
                 const updated = res.data;
-                setRecords(prev => prev.map(r => (r.id === recordId ? updated : r)));
+                setRecords(prev => (prev ? prev.map(r => (r.id === recordId ? updated : r)) : [updated]));
                 setEditingId(null);
             })
             .catch(err => {
@@ -136,7 +125,7 @@ const MyAnimeList = () => {
 
         axiosInstance.delete(`/user-anime/${recordId}`)
             .then(() => {
-                setRecords(prev => prev.filter(r => r.id !== recordId));
+                setRecords(prev => (prev ? prev.filter(r => r.id !== recordId) : []));
             })
             .catch(err => {
                 console.error('Error deleting record:', err);
