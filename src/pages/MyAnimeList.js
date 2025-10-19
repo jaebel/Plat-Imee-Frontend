@@ -16,7 +16,11 @@ const TABS = [
 
 const MyAnimeList = () => {
     const { user } = useContext(AuthContext);
-    const { records, setRecords, animeNames, setAnimeNames, episodeCounts, setEpisodeCounts } = useAnimeList();
+    const {
+        records, setRecords,
+        animeNames, setAnimeNames,
+        episodeCounts, setEpisodeCounts
+    } = useAnimeList();
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -24,19 +28,10 @@ const MyAnimeList = () => {
     const [editingId, setEditingId] = useState(null);
     const [editData, setEditData] = useState({ status: '', rating: '', episodesWatched: '' });
 
-    // Fixed useEffect to prevent nonstop requests
+    // Fetch anime list only once per user session
     useEffect(() => {
-        if (!user || !user.userId) {
-            setError('No user logged in.');
-            setLoading(false);
-            return;
-        }
-
-        // Only fetch if records are null (no cached data)
-        if (records !== null) {
-            setLoading(false);
-            return;
-        }
+        if (!user?.userId) return;
+        if (records !== null) { setLoading(false); return; }
 
         const fetchAnimeList = async () => {
             try {
@@ -46,8 +41,6 @@ const MyAnimeList = () => {
                 setRecords(userRecords);
 
                 const malIds = [...new Set(userRecords.map(r => r.malId))];
-
-                // Only fetch anime details that are not already cached
                 const missingMalIds = malIds.filter(id => !(id in animeNames));
                 const nameMap = {};
                 const episodeMap = {};
@@ -63,7 +56,6 @@ const MyAnimeList = () => {
                     }
                 }));
 
-                // Merge new anime details into existing cache
                 setAnimeNames(prev => ({ ...prev, ...nameMap }));
                 setEpisodeCounts(prev => ({ ...prev, ...episodeMap }));
 
@@ -76,11 +68,11 @@ const MyAnimeList = () => {
         };
 
         fetchAnimeList();
-    }, [user, records, setRecords, setAnimeNames, setEpisodeCounts, animeNames]);
+    }, [user, records, animeNames, setRecords, setAnimeNames, setEpisodeCounts]);
 
     const filteredRecords = activeTab === 'ALL'
-        ? records || []
-        : (records || []).filter(rec => rec.status === activeTab);
+        ? Array.isArray(records) ? records : []
+        : (Array.isArray(records) ? records : []).filter(rec => rec.status === activeTab);
 
     const handleEditClick = (record) => {
         setEditingId(record.id);
@@ -111,7 +103,10 @@ const MyAnimeList = () => {
         axiosInstance.patch(`/user-anime/${recordId}`, payload)
             .then(res => {
                 const updated = res.data;
-                setRecords(prev => (prev ? prev.map(r => (r.id === recordId ? updated : r)) : [updated]));
+                setRecords(prev => {
+                    const current = Array.isArray(prev) ? prev : [];
+                    return current.map(r => (r.id === recordId ? updated : r));
+                });
                 setEditingId(null);
             })
             .catch(err => {
@@ -125,7 +120,10 @@ const MyAnimeList = () => {
 
         axiosInstance.delete(`/user-anime/${recordId}`)
             .then(() => {
-                setRecords(prev => (prev ? prev.filter(r => r.id !== recordId) : []));
+                setRecords(prev => {
+                    const current = Array.isArray(prev) ? prev : [];
+                    return current.filter(r => r.id !== recordId);
+                });
             })
             .catch(err => {
                 console.error('Error deleting record:', err);
