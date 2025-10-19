@@ -35,7 +35,7 @@ const MyAnimeList = () => {
         episodesWatched: ''
     });
 
-    // Always fetch fresh on mount
+    // Fixed useEffect to prevent nonstop requests
     useEffect(() => {
         if (!user || !user.userId) {
             setError('No user logged in.');
@@ -43,16 +43,27 @@ const MyAnimeList = () => {
             return;
         }
 
-        console.log('Forcing re-fetch of anime list from backend...');
-        axiosInstance.get(`/user-anime/me`)
-            .then(async res => {
+        // Only fetch if records are null (no cached data)
+        if (records !== null) {
+            setLoading(false);
+            return;
+        }
+
+        const fetchAnimeList = async () => {
+            try {
+                setLoading(true);
+                const res = await axiosInstance.get(`/user-anime/me`);
                 const userRecords = res.data;
                 setRecords(userRecords);
+
                 const malIds = [...new Set(userRecords.map(r => r.malId))];
+
+                // Only fetch anime details that are not already cached
+                const missingMalIds = malIds.filter(id => !(id in animeNames));
                 const nameMap = {};
                 const episodeMap = {};
 
-                await Promise.all(malIds.map(async (malId) => {
+                await Promise.all(missingMalIds.map(async (malId) => {
                     try {
                         const response = await axiosInstance.get(`/anime/${malId}`);
                         nameMap[malId] = response.data.name || 'Unknown Title';
@@ -63,16 +74,20 @@ const MyAnimeList = () => {
                     }
                 }));
 
-                setAnimeNames(nameMap);
-                setEpisodeCounts(episodeMap);
-                setLoading(false);
-            })
-            .catch(err => {
+                // Merge new anime details into existing cache
+                setAnimeNames(prev => ({ ...prev, ...nameMap }));
+                setEpisodeCounts(prev => ({ ...prev, ...episodeMap }));
+
+            } catch (err) {
                 console.error(err);
                 setError('Error fetching your anime list.');
+            } finally {
                 setLoading(false);
-            });
-    }, [user, setRecords, setAnimeNames, setEpisodeCounts]);
+            }
+        };
+
+        fetchAnimeList();
+    }, [user, records, setRecords, setAnimeNames, setEpisodeCounts, animeNames]);
 
     const filteredRecords = activeTab === 'ALL'
         ? records || []
