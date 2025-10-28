@@ -13,11 +13,18 @@ const EditProfile = () => {
     email: '',
     firstName: '',
     lastName: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Modal-related state
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [modalError, setModalError] = useState('');
 
   useEffect(() => {
     if (!token) {
@@ -25,6 +32,7 @@ const EditProfile = () => {
       setError('No user logged in.');
       return;
     }
+
     axiosInstance.get('/users/me')
       .then(response => {
         const profile = response.data;
@@ -33,7 +41,8 @@ const EditProfile = () => {
           email: profile.email || '',
           firstName: profile.first_name || '',
           lastName: profile.last_name || '',
-          password: ''
+          password: '',
+          confirmPassword: ''
         });
         setLoading(false);
       })
@@ -48,13 +57,31 @@ const EditProfile = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSaveClick = (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
+    if (form.password && form.password !== form.confirmPassword) {
+      setError('New passwords do not match.');
+      return;
+    }
+
+    setShowPasswordModal(true);
+  };
+
+  const handleConfirmPasswordSubmit = async (e) => {
+    e.preventDefault(); // So Enter works
+    setModalError('');
+    setError('');
+
+    if (!currentPassword) {
+      setModalError('Please enter your current password.');
+      return;
+    }
+
     if (!user || !user.userId) {
-      setError('No user logged in.');
+      setModalError('No user logged in.');
       return;
     }
 
@@ -63,31 +90,48 @@ const EditProfile = () => {
         email: form.email,
         firstName: form.firstName,
         lastName: form.lastName,
+        currentPassword,
         ...(form.password && { password: form.password })
       };
 
       await axiosInstance.patch(`/users/${user.userId}`, payload);
       setSuccess('Profile updated successfully!');
+      setShowPasswordModal(false);
+      setCurrentPassword('');
       navigate('/profile');
     } catch (err) {
       console.error(err);
-      setError(err.response?.data || 'Failed to update profile.');
+      const msg = err.response?.data || 'Failed to update profile.';
+      if (typeof msg === 'string' && msg.toLowerCase().includes('incorrect')) {
+        setModalError('Incorrect current password. Please try again.');
+      } else {
+        setError(typeof msg === 'string' ? msg : 'Failed to update profile.');
+        setShowPasswordModal(false);
+      }
     }
   };
 
-  if (loading) return <div className="profile-page"><div className="profile-container">Loading profile...</div></div>;
-  if (error) return <div className="profile-page"><div className="profile-container" style={{ color: 'red' }}>{error}</div></div>;
+  if (loading) {
+    return (
+      <div className="profile-page">
+        <div className="profile-container">Loading profile...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="profile-page">
       <div className="profile-container">
         <h1>Edit Profile</h1>
         {success && <div className="success">{success}</div>}
-        <form onSubmit={handleSubmit} className="profile-form">
+        {error && <div className="error" style={{ color: 'red' }}>{error}</div>}
+
+        <form onSubmit={handleSaveClick} className="profile-form">
           <div className="form-group">
             <label htmlFor="username"><strong>Username:</strong></label>
             <div id="username" className="readonly">{form.username}</div>
           </div>
+
           <div className="form-group">
             <label htmlFor="email"><strong>Email:</strong></label>
             <input
@@ -99,6 +143,7 @@ const EditProfile = () => {
               required
             />
           </div>
+
           <div className="form-group">
             <label htmlFor="firstName"><strong>First Name:</strong></label>
             <input
@@ -109,6 +154,7 @@ const EditProfile = () => {
               onChange={handleChange}
             />
           </div>
+
           <div className="form-group">
             <label htmlFor="lastName"><strong>Last Name:</strong></label>
             <input
@@ -119,8 +165,9 @@ const EditProfile = () => {
               onChange={handleChange}
             />
           </div>
+
           <div className="form-group">
-            <label htmlFor="password"><strong>Password:</strong></label>
+            <label htmlFor="password"><strong>New Password:</strong></label>
             <input
               type="password"
               id="password"
@@ -130,9 +177,58 @@ const EditProfile = () => {
               placeholder="Enter new password if changing"
             />
           </div>
+
+          <div className="form-group">
+            <label htmlFor="confirmPassword"><strong>Confirm New Password:</strong></label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              placeholder="Re-enter new password"
+            />
+          </div>
+
           <button type="submit">Save Changes</button>
         </form>
       </div>
+
+      {/* Modal */}
+      {showPasswordModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Confirm Your Password</h3>
+            <p>Please enter your current password to confirm these changes.</p>
+
+            {modalError && <div className="error" style={{ color: 'red' }}>{modalError}</div>}
+
+            <form onSubmit={handleConfirmPasswordSubmit}>
+              <input
+                type="password"
+                placeholder="Current password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                autoFocus
+              />
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPasswordModal(false);
+                    setCurrentPassword('');
+                    setModalError('');
+                  }}
+                >
+                  Cancel
+                </button>
+                <button type="submit">Confirm</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
