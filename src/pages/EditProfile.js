@@ -149,7 +149,7 @@ const EditProfile = () => {
     <div className="profile-page">
       <div className="profile-container">
         <h1>Edit Profile</h1>
-        
+
         {success && <div className="success">{success}</div>}
         {error && <div className="error" style={{ color: 'red' }}>{error}</div>}
 
@@ -242,6 +242,7 @@ const EditProfile = () => {
               <div className="modal-actions">
                 <button
                   type="button"
+                  id="cancel"
                   onClick={() => {
                     setShowPasswordModal(false);
                     setCurrentPassword('');
@@ -250,7 +251,7 @@ const EditProfile = () => {
                 >
                   Cancel
                 </button>
-                <button type="submit">Confirm</button>
+                <button type="submit" id="confirm">Confirm</button>
               </div>
             </form>
           </div>
