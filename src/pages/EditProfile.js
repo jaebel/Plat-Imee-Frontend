@@ -26,6 +26,10 @@ const EditProfile = () => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [modalError, setModalError] = useState('');
 
+  // Validation regex patterns (matching the backend)
+  const emailPattern = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  const passwordPattern = /^(?!.*\s)(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
   useEffect(() => {
     if (!token) {
       setLoading(false);
@@ -62,9 +66,31 @@ const EditProfile = () => {
     setError('');
     setSuccess('');
 
-    if (form.password && form.password !== form.confirmPassword) {
-      setError('New passwords do not match.');
+    if (!emailPattern.test(form.email)) {
+      setError('Email must be a valid format (e.g., user@example.com).');
       return;
+    }
+
+    if (form.firstName && (form.firstName.length < 2 || form.firstName.length > 50)) {
+      setError('First name must be between 2 and 50 characters.');
+      return;
+    }
+
+    if (form.lastName && (form.lastName.length < 2 || form.lastName.length > 50)) {
+      setError('Last name must be between 2 and 50 characters.');
+      return;
+    }
+
+    if (form.password) {
+      if (form.password !== form.confirmPassword) {
+        setError('New passwords do not match.');
+        return;
+      }
+
+      if (!passwordPattern.test(form.password)) {
+        setError('Password must be at least 8 characters, include a letter, a number, a special character, and contain no spaces.');
+        return;
+      }
     }
 
     setShowPasswordModal(true);
@@ -123,6 +149,7 @@ const EditProfile = () => {
     <div className="profile-page">
       <div className="profile-container">
         <h1>Edit Profile</h1>
+        
         {success && <div className="success">{success}</div>}
         {error && <div className="error" style={{ color: 'red' }}>{error}</div>}
 
