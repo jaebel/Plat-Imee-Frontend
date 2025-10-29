@@ -184,7 +184,7 @@
   font-size: 1rem;
 }
 
-.modal-actions #cancel {
+.modal-actions #cancel, #delete, #delete-account-btn {
   background-color: #af4c4c;
   color: white;
   border: none;
