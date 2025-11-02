@@ -68,7 +68,7 @@ const SignUp = () => {
       const response = await axiosInstance.post('/users', form);
       setSuccess('User registered successfully!');
       console.log(response.data);
-      navigate('/login');
+      navigate('/verify-email', { state: { email: form.email } });
     } catch (err) {
       console.error(err);
       setError(err.response?.data || 'Registration failed.');

@@ -20,6 +20,7 @@ import AllAnime from './pages/AllAnime';
 import UpcomingAnime from './pages/UpcomingAnime';
 import SeasonalAnime from './pages/SeasonalAnime';
 import { AnimeListProvider } from './context/AnimeListContext';
+import EmailVerificationNotice from './pages/EmailVerificationNotice';
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
             <Route path="/anime" element={<AnimeList />} />
             <Route path="/all-anime" element={<AllAnime />} />
             <Route path="/seasonal" element={<SeasonalAnime />} />
+            <Route path="/verify-email" element={<EmailVerificationNotice />} />
 
             {/* Protected routes */}
             <Route 
