@@ -34,7 +34,36 @@ const Login = () => {
       navigate('/');
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || 'Login failed.');
+
+      // If the backend says the user isn't verified, redirect to verification page
+      const status = err.response?.status;
+      const data = err.response?.data;
+
+      // Extract the message (checks if we pass raw data or use headers as with the JSONJ standard)
+      const message =
+        typeof data === 'string' ? data : data?.message || '';
+
+      if (status === 403 && message.toLowerCase().includes('not verified')) {
+
+        // This way relies on the error message including the userId and email (not great)
+        // Extract userId (e.g., "for user 12345")
+        const userIdMatch = message.match(/for user\s+(\S+)/i);
+        const extractedUserId = userIdMatch ? userIdMatch[1] : err.response?.data?.userId;
+
+        // Extract email (e.g., "with email: test@example.com")
+        const emailMatch = message.match(/with email:\s*([^\s]+)\s*-/i);
+        const extractedEmail = emailMatch ? emailMatch[1] : form.username;
+
+        navigate('/verify-email', {
+          state: {
+            email: extractedEmail,
+            message: 'Your account isn’t verified yet. Please check your email or resend the verification link.',
+            userId: extractedUserId
+          }
+        });
+      } else {
+        setError(err.response?.data?.message || 'Login failed.');
+      }
     } finally {
       setLoading(false);
     }

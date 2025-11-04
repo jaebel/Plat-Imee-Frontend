@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import '../styles/Auth.css';
@@ -7,22 +7,25 @@ const EmailVerificationNotice = () => {
   const location = useLocation();
   const email = location.state?.email;
   const userId = location.state?.userId;
+  const initialMessage = location.state?.message; // message passed from login
 
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(false);
 
+  // On page load, show message from login if available
+  useEffect(() => {
+    if (initialMessage) {
+      setMessage(initialMessage);
+    }
+  }, [initialMessage]);
+
   const handleResendVerification = async () => {
     if (!userId) {
       setError('Unable to resend verification: user ID missing.');
       return;
     }
-
-    // if (cooldown) {
-    //   setError('Please wait before requesting another verification email.');
-    //   return;
-    // }
 
     setLoading(true);
     setError('');
@@ -40,7 +43,7 @@ const EmailVerificationNotice = () => {
       if (err.response?.status === 429) {
         setError('Please wait before trying again (rate limited).');
       } else {
-        setError(err.response?.data || 'Failed to resend verification email.');
+        setError(err.response?.data?.message || 'Failed to resend verification email.');
       }
     } finally {
       setLoading(false);
@@ -57,6 +60,7 @@ const EmailVerificationNotice = () => {
         </p>
         <p>Please check your inbox (and spam folder just in case).</p>
 
+        {/* ✅ Show backend or login-passed message */}
         {message && <p className="success">{message}</p>}
         {error && <p className="error">{error}</p>}
 
