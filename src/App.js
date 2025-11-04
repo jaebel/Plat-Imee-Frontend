@@ -21,6 +21,8 @@ import UpcomingAnime from './pages/UpcomingAnime';
 import SeasonalAnime from './pages/SeasonalAnime';
 import { AnimeListProvider } from './context/AnimeListContext';
 import EmailVerificationNotice from './pages/EmailVerificationNotice';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
   return (
@@ -42,6 +44,9 @@ function App() {
             <Route path="/all-anime" element={<AllAnime />} />
             <Route path="/seasonal" element={<SeasonalAnime />} />
             <Route path="/verify-email" element={<EmailVerificationNotice />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+
 
             {/* Protected routes */}
             <Route 

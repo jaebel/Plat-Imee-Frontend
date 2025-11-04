@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
 import '../styles/SignUp.css'; // Reusing the same styles
+import { Link } from 'react-router-dom';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -98,6 +99,9 @@ const Login = () => {
           <button type="submit" disabled={loading}>
             {loading ? 'Logging in...' : 'Login'}
           </button>
+          <Link to="/forgot-password" className="auth-link">
+            Forgot your password?
+          </Link>
         </form>
       </div>
     </div>
