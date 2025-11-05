@@ -38,7 +38,22 @@ const ResetPassword = () => {
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
       console.error(err);
-      setError(err.response?.data || 'Failed to reset password.');
+      if (!err.response) {
+        setError('Network error. Please try again later.');
+        return;
+      }
+    
+      const { status, data } = err.response;
+    
+      if (status === 400 && data?.includes('Invalid')) {
+        setError('This password reset link is invalid. Please request a new one.');
+      } else if (status === 400 && data?.includes('expired')) {
+        setError('This password reset link has expired. Please request a new one.');
+      } else if (status === 400 && data?.includes('used')) {
+        setError('This password reset link has already been used.');
+      } else {
+        setError(data?.message || 'Failed to reset password. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

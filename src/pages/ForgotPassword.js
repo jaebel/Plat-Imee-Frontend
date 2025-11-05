@@ -8,12 +8,17 @@ const ForgotPassword = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setMessage('');
     setLoading(true);
+    setCooldown(true);
+
+    // 5-minute cooldown (300,000 ms)
+    setTimeout(() => setCooldown(false), 300000);
 
     try {
       const response = await axiosInstance.post('/password/forgot', null, {
@@ -22,7 +27,12 @@ const ForgotPassword = () => {
       setMessage(response.data.message || 'Password reset email sent successfully.');
     } catch (err) {
       console.error(err);
-      setError(err.response?.data || 'Failed to send password reset email.');
+
+      if (err.response?.status === 429) {
+        setError('You are sending requests too quickly. Please wait before trying again.');
+      } else {
+        setError(err.response?.data || 'Failed to send password reset email.');
+      }
     } finally {
       setLoading(false);
     }
@@ -45,11 +55,16 @@ const ForgotPassword = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={cooldown}
             />
           </label>
 
-          <button type="submit" disabled={loading}>
-            {loading ? 'Sending...' : 'Send Reset Link'}
+          <button type="submit" disabled={loading || cooldown}>
+            {loading
+              ? 'Sending...'
+              : cooldown
+              ? 'On cooldown...'
+              : 'Send Reset Link'}
           </button>
         </form>
 

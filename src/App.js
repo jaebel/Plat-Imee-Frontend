@@ -23,6 +23,7 @@ import { AnimeListProvider } from './context/AnimeListContext';
 import EmailVerificationNotice from './pages/EmailVerificationNotice';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import VerifyAccount from './pages/VerifyAccount';
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
             <Route path="/verify-email" element={<EmailVerificationNotice />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/verify" element={<VerifyAccount />} />
 
 
             {/* Protected routes */}

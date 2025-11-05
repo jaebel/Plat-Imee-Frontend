@@ -60,7 +60,7 @@ const EmailVerificationNotice = () => {
         </p>
         <p>Please check your inbox (and spam folder just in case).</p>
 
-        {/* ✅ Show backend or login-passed message */}
+        {/* Show backend or login-passed message */}
         {message && <p className="success">{message}</p>}
         {error && <p className="error">{error}</p>}
 
