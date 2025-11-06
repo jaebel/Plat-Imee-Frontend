@@ -17,31 +17,42 @@ const Recommendations = () => {
   const [error, setError] = useState('');
   const [messages, setMessages] = useState({});
 
+  // Helper delay function
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  const fetchInBatches = async (ids, batchSize = 5, delayMs = 400) => {
+  // Fetch single anime with retries and exponential backoff
+  const fetchWithRetry = async (id, retries = 4, delayMs = 1500) => {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const res = await axios.get(`https://api.jikan.moe/v4/anime/${id}`);
+        return res.data.data;
+      } catch (err) {
+        console.warn(`Jikan API failed for mal_id ${id}: Attempt ${attempt} - ${err.message}`);
+        if (attempt < retries) {
+          // Wait exponentially longer each retry
+          await delay(delayMs * Math.pow(2, attempt - 1));
+        } else {
+          return null; // Give up after max retries
+        }
+      }
+    }
+  };
+
+  // Fetch anime in batches with delay between batches
+  const fetchInBatches = async (ids, batchSize = 3, delayMs = 1500) => {
     const results = [];
 
     for (let i = 0; i < ids.length; i += batchSize) {
       const batch = ids.slice(i, i + batchSize);
-      const responses = await Promise.all(
-        batch.map(async (id) => {
-          try {
-            const res = await axios.get(`https://api.jikan.moe/v4/anime/${id}`);
-            return res.data.data;
-          } catch (err) {
-            console.warn(`Jikan API failed for mal_id ${id}:`, err.message);
-            return null;
-          }
-        })
-      );
+      const responses = await Promise.all(batch.map(id => fetchWithRetry(id)));
       results.push(...responses.filter(Boolean));
-      await delay(delayMs); // Pause to avoid rate limiting
+      await delay(delayMs); // Pause between batches
     }
 
     return results;
   };
 
+  // Main fetch for recommendations
   const fetchRecommendations = async () => {
     if (!user || !user.userId) return;
 
@@ -85,7 +96,9 @@ const Recommendations = () => {
       {error && <p className="rec-error">{error}</p>}
 
       {!loading && recommendations.length === 0 && (
-        <p className="rec-empty">No recommendations available yet. Click the button above to generate some!</p>
+        <p className="rec-empty">
+          No recommendations available yet. Click the button above to generate some!
+        </p>
       )}
 
       {!loading && recommendations.length > 0 && (
@@ -105,7 +118,11 @@ const Recommendations = () => {
                 <p><strong>Rating:</strong> {anime.rating || 'N/A'}</p>
 
                 {messages[anime.mal_id] && (
-                  <p className={`rec-message ${messages[anime.mal_id].includes('added') ? 'rec-success' : 'rec-fail'}`}>
+                  <p
+                    className={`rec-message ${
+                      messages[anime.mal_id].includes('added') ? 'rec-success' : 'rec-fail'
+                    }`}
+                  >
                     {messages[anime.mal_id]}
                   </p>
                 )}
