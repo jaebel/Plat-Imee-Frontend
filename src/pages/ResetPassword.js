@@ -34,25 +34,34 @@ const ResetPassword = () => {
       const response = await axiosInstance.post(`/password/reset`, null, {
         params: { token, newPassword },
       });
+
       setMessage(response.data.message || 'Password reset successful!');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
       console.error(err);
+
       if (!err.response) {
         setError('Network error. Please try again later.');
         return;
       }
-    
+
       const { status, data } = err.response;
-    
-      if (status === 400 && data?.includes('Invalid')) {
+      // normalise backend message, whether string or object
+      const msg =
+        typeof data === 'string'
+          ? data
+          : typeof data === 'object'
+          ? data.message
+          : '';
+
+      if (status === 400 && msg?.toLowerCase().includes('invalid')) {
         setError('This password reset link is invalid. Please request a new one.');
-      } else if (status === 400 && data?.includes('expired')) {
+      } else if (status === 400 && msg?.toLowerCase().includes('expired')) {
         setError('This password reset link has expired. Please request a new one.');
-      } else if (status === 400 && data?.includes('used')) {
+      } else if (status === 400 && msg?.toLowerCase().includes('used')) {
         setError('This password reset link has already been used.');
       } else {
-        setError(data?.message || 'Failed to reset password. Please try again.');
+        setError(msg || 'Failed to reset password. Please try again.');
       }
     } finally {
       setLoading(false);
