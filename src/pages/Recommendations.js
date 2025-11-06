@@ -16,6 +16,7 @@ const Recommendations = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [messages, setMessages] = useState({});
+  const [cooldown, setCooldown] = useState(false);  // State for button cooldown
 
   // Helper delay function
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -39,14 +40,14 @@ const Recommendations = () => {
   };
 
   // Fetch anime in batches with delay between batches
-  const fetchInBatches = async (ids, batchSize = 3, delayMs = 1500) => {
+  const fetchInBatches = async (ids, batchSize = 5, delayMs = 1500) => {
     const results = [];
 
     for (let i = 0; i < ids.length; i += batchSize) {
       const batch = ids.slice(i, i + batchSize);
       const responses = await Promise.all(batch.map(id => fetchWithRetry(id)));
       results.push(...responses.filter(Boolean));
-      await delay(delayMs); // Pause between batches
+      await delay(delayMs); // Pause between batches to avoid overwhelming the API
     }
 
     return results;
@@ -54,17 +55,19 @@ const Recommendations = () => {
 
   // Main fetch for recommendations
   const fetchRecommendations = async () => {
-    if (!user || !user.userId) return;
+    if (!user || !user.userId || cooldown) return;  // Prevent fetching if button is on cooldown
 
     setLoading(true);
     setError('');
+    setCooldown(true);  // Start cooldown
+
     try {
       const response = await axiosInstance.get('/recs/me', {
         params: { safeSearch: safeSearch }
       });
 
       const ids = response.data.map(rec => rec.mal_id);
-      const fetchedDetails = await fetchInBatches(ids);
+      const fetchedDetails = await fetchInBatches(ids, 5);  // Fetch in batches of 5
 
       setRecommendations(fetchedDetails);
     } catch (err) {
@@ -72,6 +75,7 @@ const Recommendations = () => {
       setError('Error fetching recommendations.');
     } finally {
       setLoading(false);
+      setTimeout(() => setCooldown(false), 30000); // 60-second cooldown
     }
   };
 
@@ -88,8 +92,16 @@ const Recommendations = () => {
         Enable Safe Search
       </label>
 
-      <button className="rec-generate-btn" onClick={fetchRecommendations}>
-        Generate Recommendations
+      <button
+        className="rec-generate-btn"
+        onClick={fetchRecommendations}
+        disabled={loading || cooldown}  // Disable button if loading or cooldown is active
+      >
+        {loading
+          ? 'Loading...'
+          : cooldown
+          ? 'On Cooldown...'
+          : 'Generate Recommendations'}
       </button>
 
       {loading && <p className="rec-loading">Loading recommendations...</p>}
