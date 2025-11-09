@@ -28,10 +28,11 @@ const MyAnimeList = () => {
     const [editingId, setEditingId] = useState(null);
     const [editData, setEditData] = useState({ status: '', rating: '', episodesWatched: '' });
 
-    // Fetch anime list only once per user session
+    // Effect 1: Fetch anime list only once per user session
     useEffect(() => {
         if (!user?.userId) return;
         if (records !== null) {
+            // If we already have records (from context or cache), don't fetch again.
             setLoading(false);
             return;
         }
@@ -42,28 +43,6 @@ const MyAnimeList = () => {
                 const res = await axiosInstance.get(`/user-anime/me`);
                 const userRecords = Array.isArray(res.data) ? res.data : [];
                 setRecords(userRecords);
-
-                const malIds = [...new Set(userRecords.map(r => r.malId))];
-                const missingMalIds = malIds.filter(id => !(id in animeNames));
-                const nameMap = {};
-                const episodeMap = {};
-
-                await Promise.all(
-                    missingMalIds.map(async (malId) => {
-                        try {
-                            const response = await axiosInstance.get(`/anime/${malId}`);
-                            nameMap[malId] = response.data.name || 'Unknown Title';
-                            episodeMap[malId] = response.data.episodes ?? null;
-                        } catch {
-                            nameMap[malId] = 'Unknown Title';
-                            episodeMap[malId] = null;
-                        }
-                    })
-                );
-
-                setAnimeNames(prev => ({ ...prev, ...nameMap }));
-                setEpisodeCounts(prev => ({ ...prev, ...episodeMap }));
-
             } catch (err) {
                 console.error(err);
                 setError('Error fetching your anime list.');
@@ -73,7 +52,40 @@ const MyAnimeList = () => {
         };
 
         fetchAnimeList();
-    }, [user, records, animeNames, setRecords, setAnimeNames, setEpisodeCounts]);
+    }, [user, records, setRecords]);
+
+    // Effect 2: Fetch missing anime names & episode counts after records load
+    useEffect(() => {
+        if (!records || records.length === 0) return;
+
+        const malIds = [...new Set(records.map(r => r.malId))];
+        const missingMalIds = malIds.filter(id => !(id in animeNames));
+        if (missingMalIds.length === 0) return; // nothing new to fetch
+
+        const fetchMissingAnimeData = async () => {
+            const nameMap = {};
+            const episodeMap = {};
+
+            await Promise.all(
+                missingMalIds.map(async (malId) => {
+                    try {
+                        const response = await axiosInstance.get(`/anime/${malId}`);
+                        nameMap[malId] = response.data.name || 'Unknown Title';
+                        episodeMap[malId] = response.data.episodes ?? null;
+                    } catch {
+                        nameMap[malId] = 'Unknown Title';
+                        episodeMap[malId] = null;
+                    }
+                })
+            );
+
+            // Merge new data with what’s already in context
+            setAnimeNames(prev => ({ ...prev, ...nameMap }));
+            setEpisodeCounts(prev => ({ ...prev, ...episodeMap }));
+        };
+
+        fetchMissingAnimeData();
+    }, [records, animeNames, setAnimeNames, setEpisodeCounts]);
 
     // Filter records by tab
     const filteredRecords = activeTab === 'ALL'
