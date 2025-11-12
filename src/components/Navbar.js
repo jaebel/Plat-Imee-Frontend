@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import '../styles/Navbar.css';
+// import '../styles/Navbar.css';
 
 const Navbar = () => {
     const { token, user, logout } = useContext(AuthContext);
@@ -16,33 +16,37 @@ const Navbar = () => {
     };
 
     return (
-        <div className="navbar-border">
-            <nav className="navbar-container">
-                <div className="navbar-left">
-                    <NavLink to="/" className="navbar-logo">Plat-Imee</NavLink>
-                    <form onSubmit={handleSearch} className="navbar-search-form">
-                        <input type="text" name="search" placeholder="Search anime..." className="navbar-search-input" />
-                        <button type="submit" className="navbar-search-button">Search</button>
+        <div className="border-b border-gray-300">
+            <nav className="flex items-center justify-between p-4 bg-[#36454F] text-white font-medium">
+
+                {/* Left navbar*/}
+                <div className="flex items-center space-x-4">
+                    <NavLink to="/" className="font-bold text-lg">Plat-Imee</NavLink>
+                    <form onSubmit={handleSearch}>
+                        <input type="text" name="search" placeholder="Search anime..." className="px-2 py-1 rounded-l-md text-[#36454F] focus:outline-none" />
+                        <button type="submit" className="bg-[#DEB8B8] text-[#36454F] px-3 py-1 rounded-r-md hover:bg-[#d6a8a8] transition-colors duration-300">Search</button>
                     </form>
                 </div>
 
-                <div className="navbar-center">
-                    {token && <NavLink to="/my-anime" className="navbar-link">My Anime List</NavLink>}
+                {/* Middle navbar*/}
+                <div>
+                    {token && <NavLink to="/my-anime" className="fancy-underline">My Anime List</NavLink>}
                 </div>
-
-                <div className="navbar-right">
+                
+                {/* Right navbar*/}
+                <div className="flex items-center space-x-6">
                     {token ? (
                         <>
-                            <NavLink to="/profile" className="navbar-link">
+                            <NavLink to="/profile" className="fancy-underline">
                                 {user?.username || 'Profile'}
                             </NavLink>
-                            <NavLink to="/recommendations" className="navbar-link">Recommendations</NavLink>
-                            <button onClick={logout} className="navbar-logout">Logout</button>
+                            <NavLink to="/recommendations" className="fancy-underline">Recommendations</NavLink>
+                            <button onClick={logout} className="fancy-underline">Logout</button>
                         </>
                     ) : (
                         <>
-                            <NavLink to="/signup" className="navbar-link">Sign Up</NavLink>
-                            <NavLink to="/login" className="navbar-link">Login</NavLink>
+                            <NavLink to="/signup" className="fancy-underline">Sign Up</NavLink>
+                            <NavLink to="/login" className="fancy-underline">Login</NavLink>
                         </>
                     )}
                 </div>
