@@ -48,8 +48,7 @@ const Navbar = () => {
                 </div>
                 
                 {/* Right navbar */}
-                <div className="hidden sm:flex items-center gap-[0.25rem] md:gap-[0.5rem] lg:gap-[1.5rem] transition-all duration-300 ease">
-                
+                <div className="hidden sm:flex items-center gap-1 md:gap-2 lg:gap-6 transition-all duration-300 ease">
                 
                     {token ? (
                         <>
@@ -84,7 +83,6 @@ const Navbar = () => {
                         </>
                     )}
                 </div>
-
 
                 {/* Hamburger button for mobile */}
                 <button
