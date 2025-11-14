@@ -84,7 +84,9 @@ const Home = () => {
       </main>
 
       {/* Info Section */}
-      <footer className="w-full bg-[#36454F] text-white py-12 px-8 md:px-16">
+      <footer className="relative w-full bg-[#36454F] text-white py-12 px-8 md:px-16">
+        {/* Faded line */}
+        <div className="absolute top-0 left-0 w-full h-4 bg-gradient-to-b from-[#00000040] to-transparent" />
         <div className="flex flex-col md:flex-row justify-between gap-8 max-w-full mx-auto">
           <div className="flex-1 bg-[#516977] p-6 rounded-lg shadow-md text-center md:text-left">
             <h3 className="text-xl font-bold mb-2">About Plat-Imee</h3>

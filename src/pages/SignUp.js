@@ -2,16 +2,13 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
-import '../styles/SignUp.css';
 
 const SignUp = () => {
   const navigate = useNavigate();
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
-    if (token) {
-      navigate('/');
-    }
+    if (token) navigate('/');
   }, [token, navigate]);
 
   const [form, setForm] = useState({
@@ -76,40 +73,106 @@ const SignUp = () => {
   };
 
   return (
-    <div className="signup-page">
-      <div className="signup-container">
-        <h1>Sign Up</h1>
+    <div className="min-h-screen flex justify-center items-start pt-10 bg-[#1A2025]">
+      <div className="w-full max-w-md p-8 bg-[#36454F] rounded-lg shadow-md text-white">
 
-        {error && <div className="error">{error}</div>}
-        {success && <div className="success">{success}</div>}
+        <h1 className="text-2xl text-center mb-6 border-b border-white pb-2">
+          Sign Up
+        </h1>
 
-        <form onSubmit={handleSubmit}>
-          <label>
+        {error && (
+          <div className="text-[#FF5252] text-center mb-4">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="text-[#00E676] text-center mb-4">
+            {success}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <label className="flex flex-col text-sm">
             Username:
-            <input type="text" name="username" value={form.username} onChange={handleChange} required />
+            <input
+              type="text"
+              name="username"
+              value={form.username}
+              onChange={handleChange}
+              required
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
+            />
           </label>
-          <label>
+
+          <label className="flex flex-col text-sm">
             Email:
-            <input type="email" name="email" value={form.email} onChange={handleChange} required />
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              required
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
+            />
           </label>
-          <label>
+
+          <label className="flex flex-col text-sm">
             First Name:
-            <input type="text" name="firstName" value={form.firstName} onChange={handleChange} required />
+            <input
+              type="text"
+              name="firstName"
+              value={form.firstName}
+              onChange={handleChange}
+              required
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
+            />
           </label>
-          <label>
+
+          <label className="flex flex-col text-sm">
             Last Name:
-            <input type="text" name="lastName" value={form.lastName} onChange={handleChange} required />
+            <input
+              type="text"
+              name="lastName"
+              value={form.lastName}
+              onChange={handleChange}
+              required
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
+            />
           </label>
-          <label>
+
+          <label className="flex flex-col text-sm">
             Password:
-            <input type="password" name="password" value={form.password} onChange={handleChange} required />
+            <input
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              required
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
+            />
           </label>
-          <label>
+
+          <label className="flex flex-col text-sm">
             Confirm Password:
-            <input type="password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} required />
+            <input
+              type="password"
+              name="confirmPassword"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              required
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
+            />
           </label>
-          <button type="submit">Register</button>
+
+          <button
+            type="submit"
+            className="mt-4 p-3 bg-[#4caf50] rounded-md hover:bg-[#45a049] transition-colors"
+          >
+            Register
+          </button>
         </form>
+
       </div>
     </div>
   );
