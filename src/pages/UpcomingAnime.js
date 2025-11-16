@@ -26,23 +26,45 @@ const UpcomingAnime = () => {
   useAutoMessageClear(messages, setMessages);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, [page]);
 
   useEffect(() => {
+    const controller = new AbortController();
+    
     setLoading(true);
     setError('');
+    
     axios
-      .get(`https://api.jikan.moe/v4/seasons/upcoming?page=${page}`)
+      .get(`https://api.jikan.moe/v4/seasons/upcoming?page=${page}`, {
+        signal: controller.signal
+      })
       .then((res) => {
         setAnimeList(res.data.data || []);
         setLoading(false);
       })
       .catch((err) => {
+        // Ignore abort errors
+        if (err.name === 'CanceledError') return;
+        
         console.error('Error fetching upcoming anime:', err);
-        setError('Failed to fetch upcoming anime.');
+        console.error('Status:', err.response?.status);
+        console.error('Message:', err.response?.data?.message);
+        
+        // Better error messages
+        if (err.response?.status === 429) {
+          setError('Rate limit exceeded. Please wait a moment and try again.');
+        } else if (err.response?.status === 404) {
+          setError('Page not found.');
+        } else {
+          setError('Failed to fetch upcoming anime. Please try again later.');
+        }
+        
         setLoading(false);
       });
+    
+    // Cleanup: cancel the request if component unmounts or dependencies change
+    return () => controller.abort();
   }, [page]);
 
   return (
@@ -52,23 +74,20 @@ const UpcomingAnime = () => {
       {loading && <p>Loading upcoming anime...</p>}
       {error && <p className="text-[#FF5252]">{error}</p>}
 
-      {animeList.length === 0 ? (
-        <p>No upcoming anime found.</p>
-      ) : (
-        <ul className="grid gap-8 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 list-none p-0 m-0">
-          {animeList.map((item) => (
-            <AnimeCard
-              key={item.mal_id}
-              anime={item}
-              message={messages[item.mal_id]}
-              onAddToList={() =>
-                handleAddToList(item.mal_id, user, setMessages, setRecords)
-              }
-              onViewDetails={() => handleViewDetails(item, navigate)}
-            />
-          ))}
-        </ul>
-      )}
+
+      <ul className="grid gap-8 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 list-none p-0 m-0">
+        {animeList.map((item) => (
+          <AnimeCard
+            key={item.mal_id}
+            anime={item}
+            message={messages[item.mal_id]}
+            onAddToList={() =>
+              handleAddToList(item.mal_id, user, setMessages, setRecords)
+            }
+            onViewDetails={() => handleViewDetails(item, navigate)}
+          />
+        ))}
+      </ul>
 
       <div className="mt-10 flex justify-center items-center gap-4">
         <button
