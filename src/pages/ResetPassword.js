@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
-import '../styles/Auth.css';
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -69,36 +68,55 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
-        <h1>Reset Your Password</h1>
-        <p>Enter a new password for your account.</p>
+    <div className="min-h-screen flex justify-center items-start pt-20 bg-[#1a2025]">
+      <div className="w-full max-w-md p-8 bg-[#36454F] rounded-lg shadow-md text-white">
+        <h1 className="text-2xl text-center mb-4 border-b border-white pb-2">
+          Reset Your Password
+        </h1>
+        <p className="text-sm text-gray-300 text-center mb-6">
+          Enter a new password for your account.
+        </p>
 
-        {message && <p className="success">{message}</p>}
-        {error && <p className="error">{error}</p>}
+        {message && (
+          <div className="text-[#00E676] text-center mb-4">
+            {message}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit}>
-          <label>
+        {error && (
+          <div className="text-red-500 mb-4 text-center">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <label className="flex flex-col text-sm">
             New Password:
             <input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
             />
           </label>
 
-          <label>
+          <label className="flex flex-col text-sm">
             Confirm Password:
             <input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
             />
           </label>
 
-          <button type="submit" disabled={loading}>
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-4 p-3 bg-[#4caf50] rounded-md hover:bg-[#45a049] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {loading ? 'Resetting...' : 'Reset Password'}
           </button>
         </form>

@@ -1,157 +1,145 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useCallback } from 'react';
 import axios from 'axios';
 import axiosInstance from '../api/axiosInstance';
+
 import { AuthContext } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { RecommendationsContext } from '../context/RecommendationsContext';
+import { useAnimeList } from '../context/AnimeListContext';
+
+import AnimeCard from '../components/AnimeCard';
+import useAutoMessageClear from '../hooks/useAutoMessageClear';
 import { handleAddToList } from '../utils/handleAddToList';
 import { handleViewDetails } from '../utils/handleViewDetails';
-import '../styles/Recommendations.css';
+
+import { useNavigate } from 'react-router-dom';
+
+const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Retry utility
+const fetchWithRetry = async (id, retries = 4, delayMs = 1500) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const res = await axios.get(`https://api.jikan.moe/v4/anime/${id}`);
+      return res.data.data;
+    } catch (err) {
+      if (attempt === retries) return null;
+      await delay(delayMs * Math.pow(2, attempt - 1));
+    }
+  }
+};
+
+// Batch requests
+const fetchInBatches = async (ids, batchSize = 5, delayMs = 1500) => {
+  const results = [];
+
+  for (let i = 0; i < ids.length; i += batchSize) {
+    const batch = ids.slice(i, i + batchSize);
+    const res = await Promise.all(batch.map((id) => fetchWithRetry(id)));
+    results.push(...res.filter(Boolean));
+    await delay(delayMs);
+  }
+
+  return results;
+};
 
 const Recommendations = () => {
-  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+  const { recommendations, setRecommendations } = useContext(RecommendationsContext);
+  const { setRecords } = useAnimeList();
 
-  const [recommendations, setRecommendations] = useState([]);
   const [safeSearch, setSafeSearch] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(false);
   const [error, setError] = useState('');
   const [messages, setMessages] = useState({});
-  const [cooldown, setCooldown] = useState(false);  // State for button cooldown
 
-  // Helper delay function
-  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  useAutoMessageClear(messages, setMessages);
 
-  // Fetch single anime with retries and exponential backoff
-  const fetchWithRetry = async (id, retries = 4, delayMs = 1500) => {
-    for (let attempt = 1; attempt <= retries; attempt++) {
-      try {
-        const res = await axios.get(`https://api.jikan.moe/v4/anime/${id}`);
-        return res.data.data;
-      } catch (err) {
-        console.warn(`Jikan API failed for mal_id ${id}: Attempt ${attempt} - ${err.message}`);
-        if (attempt < retries) {
-          // Wait exponentially longer each retry
-          await delay(delayMs * Math.pow(2, attempt - 1));
-        } else {
-          return null; // Give up after max retries
-        }
-      }
-    }
-  };
+  // Main fetch handler
+  const fetchRecommendations = useCallback(async () => {
+    if (!user?.userId || cooldown) return;
 
-  // Fetch anime in batches with delay between batches
-  const fetchInBatches = async (ids, batchSize = 5, delayMs = 1500) => {
-    const results = [];
-
-    for (let i = 0; i < ids.length; i += batchSize) {
-      const batch = ids.slice(i, i + batchSize);
-      const responses = await Promise.all(batch.map(id => fetchWithRetry(id)));
-      results.push(...responses.filter(Boolean));
-      await delay(delayMs); // Pause between batches to avoid overwhelming the API
-    }
-
-    return results;
-  };
-
-  // Main fetch for recommendations
-  const fetchRecommendations = async () => {
-    if (!user || !user.userId || cooldown) return;  // Prevent fetching if button is on cooldown
-
+    const controller = new AbortController();
     setLoading(true);
     setError('');
-    setCooldown(true);  // Start cooldown
+    setCooldown(true);
 
     try {
-      const response = await axiosInstance.get('/recs/me', {
-        params: { safeSearch: safeSearch }
+      const res = await axiosInstance.get('/recs/me', {
+        params: { safeSearch },
+        signal: controller.signal
       });
 
-      const ids = response.data.map(rec => rec.mal_id);
-      const fetchedDetails = await fetchInBatches(ids, 5);  // Fetch in batches of 5
+      const ids = res.data.map((item) => item.mal_id);
 
-      setRecommendations(fetchedDetails);
+      const detailResults = await fetchInBatches(ids, 5);
+      setRecommendations(detailResults);
     } catch (err) {
-      console.error(err);
-      setError('Error fetching recommendations.');
+      if (err.name !== 'CanceledError') {
+        setError('Failed to load recommendations.');
+      }
     } finally {
       setLoading(false);
-      setTimeout(() => setCooldown(false), 30000); // 60-second cooldown
+      setTimeout(() => setCooldown(false), 30000);
     }
-  };
+
+    return () => controller.abort();
+  }, [user, safeSearch, cooldown, setRecommendations]);
 
   return (
-    <div className="rec-page-container">
-      <h1 className="rec-title">Recommendations</h1>
-
-      <label className="rec-checkbox-label">
-        <input
-          type="checkbox"
-          checked={safeSearch}
-          onChange={() => setSafeSearch(!safeSearch)}
-        />
-        Enable Safe Search
-      </label>
+    <div className="bg-[#1A2025] min-h-screen text-white px-5 py-10">
+      <h1 className="text-3xl mb-6 border-b-2 border-gray-600 pb-2">Recommendations</h1>
 
       <button
-        className="rec-generate-btn"
         onClick={fetchRecommendations}
-        disabled={loading || cooldown}  // Disable button if loading or cooldown is active
+        disabled={loading || cooldown}
+        className="bg-[#36454F] px-4 py-2 rounded-md disabled:opacity-50 hover:bg-[#2c3a43] transition mb-6"
       >
         {loading
           ? 'Loading...'
           : cooldown
           ? 'On Cooldown...'
+          : recommendations.length > 0
+          ? 'Regenerate Recommendations'
           : 'Generate Recommendations'}
       </button>
 
-      {loading && <p className="rec-loading">Loading recommendations...</p>}
-      {error && <p className="rec-error">{error}</p>}
+      <label className="flex items-center gap-2 mb-6">
+        <input
+          type="checkbox"
+          checked={safeSearch}
+          onChange={() => setSafeSearch(!safeSearch)}
+        />
+        <span>Enable Safe Search</span>
+      </label>
+
+      <p className='my-5'>
+        <strong>Notice: </strong>recommendations can only be generated
+            for users with anime lists containing atleast one anime in the recommendation system training data
+            - newer anime (post 2023) may not qualify.
+      </p>
+
+      {loading && <p>Loading recommendations...</p>}
+      {error && <p className="text-[#FF5252]">{error}</p>}
 
       {!loading && recommendations.length === 0 && (
-        <p className="rec-empty">
-          No recommendations available yet. Click the button above to generate some!
-        </p>
+        <p>No recommendations yet. Click above to generate some!</p>
       )}
 
-      {!loading && recommendations.length > 0 && (
-        <ul className="rec-anime-list">
-          {recommendations.map(anime => (
-            <li key={anime.mal_id} className="rec-anime-item">
-              <img
-                src={anime.images?.jpg?.image_url}
-                alt={anime.title}
-                className="rec-anime-image"
-                onClick={() => handleViewDetails(anime, navigate)}
-              />
-              <div className="rec-anime-info">
-                <h2 className="rec-anime-title">{anime.title_english || anime.title}</h2>
-                <p><strong>Type:</strong> {anime.type || 'Unknown'}</p>
-                <p><strong>Aired:</strong> {anime.aired?.string || 'N/A'}</p>
-                <p><strong>Rating:</strong> {anime.rating || 'N/A'}</p>
-
-                {messages[anime.mal_id] && (
-                  <p
-                    className={`rec-message ${
-                      messages[anime.mal_id].includes('added') ? 'rec-success' : 'rec-fail'
-                    }`}
-                  >
-                    {messages[anime.mal_id]}
-                  </p>
-                )}
-
-                <div className="rec-anime-actions">
-                  <button onClick={() => handleAddToList(anime.mal_id, user, setMessages)}>
-                    Add to My List
-                  </button>
-                  <button onClick={() => handleViewDetails(anime, navigate)}>
-                    View Details
-                  </button>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+      <ul className="grid gap-8 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 list-none p-0 m-0">
+        {recommendations.map((anime) => (
+          <AnimeCard
+            key={anime.mal_id}
+            anime={anime}
+            message={messages[anime.mal_id]}
+            onAddToList={() =>
+              handleAddToList(anime.mal_id, user, setMessages, setRecords)
+            }
+            onViewDetails={() => handleViewDetails(anime, navigate)}
+          />
+        ))}
+      </ul>
     </div>
   );
 };

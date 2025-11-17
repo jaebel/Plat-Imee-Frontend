@@ -24,69 +24,72 @@ import EmailVerificationNotice from './pages/EmailVerificationNotice';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import VerifyAccount from './pages/VerifyAccount';
+import { RecommendationsProvider } from './context/RecommendationsContext';
 
 function App() {
   return (
     <AuthProvider>
       <AnimeListProvider>
-        <BrowserRouter>
-          <Navbar />
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/search" element={<SearchAnime />} />
-            <Route path="/top" element={<TopAnime />} />
-            <Route path="/upcoming" element={<UpcomingAnime />} />
-            <Route path="/genre-picker" element={<GenrePicker />} />
-            <Route path="/genre-results" element={<GenreResults />} />
-            <Route path="/anime" element={<AnimeList />} />
-            <Route path="/all-anime" element={<AllAnime />} />
-            <Route path="/seasonal" element={<SeasonalAnime />} />
-            <Route path="/verify-email" element={<EmailVerificationNotice />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/verify" element={<VerifyAccount />} />
+        <RecommendationsProvider>
+          <BrowserRouter>
+            <Navbar />
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/search" element={<SearchAnime />} />
+              <Route path="/top" element={<TopAnime />} />
+              <Route path="/upcoming" element={<UpcomingAnime />} />
+              <Route path="/genre-picker" element={<GenrePicker />} />
+              <Route path="/genre-results" element={<GenreResults />} />
+              <Route path="/anime" element={<AnimeList />} />
+              <Route path="/all-anime" element={<AllAnime />} />
+              <Route path="/seasonal" element={<SeasonalAnime />} />
+              <Route path="/verify-email" element={<EmailVerificationNotice />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/verify" element={<VerifyAccount />} />
 
 
-            {/* Protected routes */}
-            <Route 
-              path="/profile" 
-              element={
-                <PrivateRoute>
-                  <Profile />
-                </PrivateRoute>
-              } 
-            />
-            <Route 
-              path="/edit-profile" 
-              element={
-                <PrivateRoute>
-                  <EditProfile />
-                </PrivateRoute>
-              } 
-            />
-            <Route 
-              path="/my-anime" 
-              element={
-                <PrivateRoute>
-                  <MyAnimeList />
-                </PrivateRoute>
-              } 
-            />
-            <Route 
-              path="/recommendations" 
-              element={
-                <PrivateRoute>
-                  <Recommendations />
-                </PrivateRoute>
-              }
-            />
+              {/* Protected routes */}
+              <Route 
+                path="/profile" 
+                element={
+                  <PrivateRoute>
+                    <Profile />
+                  </PrivateRoute>
+                } 
+              />
+              <Route 
+                path="/edit-profile" 
+                element={
+                  <PrivateRoute>
+                    <EditProfile />
+                  </PrivateRoute>
+                } 
+              />
+              <Route 
+                path="/my-anime" 
+                element={
+                  <PrivateRoute>
+                    <MyAnimeList />
+                  </PrivateRoute>
+                } 
+              />
+              <Route 
+                path="/recommendations" 
+                element={
+                  <PrivateRoute>
+                    <Recommendations />
+                  </PrivateRoute>
+                }
+              />
 
-            <Route path="/anime/:id" element={<AnimeDetails />} />
-          </Routes>
-        </BrowserRouter>
+              <Route path="/anime/:id" element={<AnimeDetails />} />
+            </Routes>
+          </BrowserRouter>
+        </RecommendationsProvider>
       </AnimeListProvider>  
     </AuthProvider>
   );
