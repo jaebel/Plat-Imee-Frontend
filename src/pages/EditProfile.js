@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
-import '../styles/Profile.css';
 
 const EditProfile = () => {
   const navigate = useNavigate();
@@ -139,119 +138,149 @@ const EditProfile = () => {
 
   if (loading) {
     return (
-      <div className="profile-page">
-        <div className="profile-container">Loading profile...</div>
+      <div className="min-h-screen flex justify-center items-start pt-20 bg-[#1a2025]">
+        <div className="w-full max-w-md p-8 bg-[#36454F] rounded-lg shadow-md text-white">
+          Loading profile...
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="profile-page">
-      <div className="profile-container">
-        <h1>Edit Profile</h1>
+    <div className="min-h-screen flex justify-center items-start pt-10 bg-[#1a2025]">
+      <div className="w-full max-w-md p-8 bg-[#36454F] rounded-lg shadow-md text-white">
+        <h1 className="text-2xl text-center mb-6 border-b border-white pb-2">Edit Profile</h1>
 
-        {success && <div className="success">{success}</div>}
-        {error && <div className="error" style={{ color: 'red' }}>{error}</div>}
+        {success && (
+          <div className="text-[#00E676] text-center mb-4">
+            {success}
+          </div>
+        )}
 
-        <form onSubmit={handleSaveClick} className="profile-form">
-          <div className="form-group">
-            <label htmlFor="username"><strong>Username:</strong></label>
-            <div id="username" className="readonly">{form.username}</div>
+        {error && (
+          <div className="text-red-500 mb-4 text-center">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSaveClick} className="flex flex-col gap-4">
+          <div className="flex flex-col text-sm">
+            <label className="mb-1">
+              <strong>Username:</strong>
+            </label>
+            <div className="p-3 rounded-md bg-[#555] text-gray-300 border border-[#444]">
+              {form.username}
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="email"><strong>Email:</strong></label>
+          <label className="flex flex-col text-sm">
+            <strong>Email:</strong>
             <input
               type="email"
-              id="email"
               name="email"
               value={form.email}
               onChange={handleChange}
               required
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
             />
-          </div>
+          </label>
 
-          <div className="form-group">
-            <label htmlFor="firstName"><strong>First Name:</strong></label>
+          <label className="flex flex-col text-sm">
+            <strong>First Name:</strong>
             <input
               type="text"
-              id="firstName"
               name="firstName"
               value={form.firstName}
               onChange={handleChange}
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
             />
-          </div>
+          </label>
 
-          <div className="form-group">
-            <label htmlFor="lastName"><strong>Last Name:</strong></label>
+          <label className="flex flex-col text-sm">
+            <strong>Last Name:</strong>
             <input
               type="text"
-              id="lastName"
               name="lastName"
               value={form.lastName}
               onChange={handleChange}
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
             />
-          </div>
+          </label>
 
-          <div className="form-group">
-            <label htmlFor="password"><strong>New Password:</strong></label>
+          <label className="flex flex-col text-sm">
+            <strong>New Password:</strong>
             <input
               type="password"
-              id="password"
               name="password"
               value={form.password}
               onChange={handleChange}
               placeholder="Enter new password if changing"
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#36454F]"
             />
-          </div>
+          </label>
 
-          <div className="form-group">
-            <label htmlFor="confirmPassword"><strong>Confirm New Password:</strong></label>
+          <label className="flex flex-col text-sm">
+            <strong>Confirm New Password:</strong>
             <input
               type="password"
-              id="confirmPassword"
               name="confirmPassword"
               value={form.confirmPassword}
               onChange={handleChange}
               placeholder="Re-enter new password"
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#36454F]"
             />
-          </div>
+          </label>
 
-          <button type="submit">Save Changes</button>
+          <button
+            type="submit"
+            className="mt-4 p-3 bg-[#4caf50] rounded-md hover:bg-[#45a049] transition-colors"
+          >
+            Save Changes
+          </button>
         </form>
       </div>
 
-      {/* Modal */}
+      {/* Password Confirmation Modal */}
       {showPasswordModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>Confirm Your Password</h3>
-            <p>Please enter your current password to confirm these changes.</p>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="w-full max-w-md p-8 bg-[#36454F] rounded-lg shadow-lg text-white mx-4">
+            <h3 className="text-xl mb-4 border-b border-white pb-2">Confirm Your Password</h3>
+            <p className="mb-6 text-sm text-gray-300">
+              Please enter your current password to confirm these changes.
+            </p>
 
-            {modalError && <div className="error" style={{ color: 'red' }}>{modalError}</div>}
+            {modalError && (
+              <div className="text-red-500 mb-4 text-center text-sm">{modalError}</div>
+            )}
 
-            <form onSubmit={handleConfirmPasswordSubmit}>
+            <form onSubmit={handleConfirmPasswordSubmit} className="flex flex-col gap-4">
               <input
                 type="password"
                 placeholder="Current password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 autoFocus
+                className="p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#36454F]"
               />
 
-              <div className="modal-actions">
+              <div className="flex gap-3 mt-2">
                 <button
                   type="button"
-                  id="cancel"
                   onClick={() => {
                     setShowPasswordModal(false);
                     setCurrentPassword('');
                     setModalError('');
                   }}
+                  className="flex-1 p-3 bg-[#666] rounded-md hover:bg-[#555] transition-colors"
                 >
                   Cancel
                 </button>
-                <button type="submit" id="confirm">Confirm</button>
+                <button
+                  type="submit"
+                  className="flex-1 p-3 bg-[#4caf50] rounded-md hover:bg-[#45a049] transition-colors"
+                >
+                  Confirm
+                </button>
               </div>
             </form>
           </div>

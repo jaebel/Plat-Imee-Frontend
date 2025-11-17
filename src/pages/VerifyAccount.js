@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
-import '../styles/Auth.css';
 
 const VerifyAccount = () => {
   const navigate = useNavigate();
@@ -10,10 +9,10 @@ const VerifyAccount = () => {
 
   const [status, setStatus] = useState('verifying'); // verifying | success | error
   const [message, setMessage] = useState('');
-  const hasRunRef = useRef(false); // persists between effect runs
+  const hasRunRef = useRef(false);
 
   useEffect(() => {
-    if (hasRunRef.current) return; // prevent double-run in Strict Mode
+    if (hasRunRef.current) return;
     hasRunRef.current = true;
 
     let timer;
@@ -60,26 +59,59 @@ const VerifyAccount = () => {
   }, [token, navigate]);
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
-        {status === 'verifying' && <h1>Verifying your account...</h1>}
+    <div className="min-h-screen flex justify-center items-start pt-10 bg-[#1A2025]">
+      <div className="w-full max-w-md p-8 bg-[#36454F] rounded-lg shadow-md text-white">
 
+        {/* Verifying */}
+        {status === 'verifying' && (
+          <h1 className="text-2xl text-center mb-4 border-b border-white pb-2">
+            Verifying your account...
+          </h1>
+        )}
+
+        {/* Success */}
         {status === 'success' && (
           <>
-            <h1>Account Verified 🎉</h1>
-            <p className="success">{message}</p>
-            <p>You’ll be redirected shortly or you can go to login now.</p>
-            <Link to="/login" className="auth-link">Go to Login</Link>
+            <h1 className="text-2xl text-center mb-4 border-b border-white pb-2">
+              Account Verified 🎉
+            </h1>
+
+            <p className="text-[#00E676] text-center mb-3">{message}</p>
+
+            <p className="text-center mb-4">
+              You’ll be redirected shortly or you can go to login now.
+            </p>
+
+            <div className="w-max mt-2">
+              <Link
+                to="/login"
+                className="text-sm text-[#bce6ff] hover:underline"
+              >
+                Go to Login
+              </Link>
+            </div>
           </>
         )}
 
+        {/* Error */}
         {status === 'error' && (
           <>
-            <h1>Verification Failed</h1>
-            <p className="error">{message}</p>
-            <Link to="/login" className="auth-link">Return to Login</Link>
+            <h1 className="text-2xl text-center mb-4 border-b border-white pb-2">
+              Verification Failed
+            </h1>
+
+            <p className="text-[#FF5252] text-center mb-3">{message}</p>
+
+            <Link
+              to="/login"
+              className="block w-full mt-4 p-3 bg-[#4caf50] rounded-md text-center hover:bg-[#45a049] transition-colors"
+            >
+              Return to Login
+            </Link>
+
           </>
         )}
+
       </div>
     </div>
   );

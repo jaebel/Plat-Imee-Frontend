@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { AuthContext } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import '../styles/Profile.css';
 
 const Profile = () => {
   const { token, logout } = useContext(AuthContext);
@@ -46,58 +45,98 @@ const Profile = () => {
     }
   };
 
-  if (loading) return <div className="profile-page"><div className="profile-container">Loading profile...</div></div>;
-  if (error) return <div className="profile-page"><div className="profile-container" style={{ color: 'red' }}>{error}</div></div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-start pt-20 bg-[#1a2025]">
+        <div className="w-full max-w-md p-8 bg-[#36454F] rounded-lg shadow-md text-white">
+          Loading profile...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex justify-center items-start pt-20 bg-[#1a2025]">
+        <div className="w-full max-w-md p-8 bg-[#36454F] rounded-lg shadow-md text-red-500">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="profile-page">
-      <div className="profile-container">
-        <h1>Profile</h1>
+    <div className="min-h-screen flex justify-center items-start pt-20 bg-[#1a2025]">
+      <div className="w-full max-w-md p-8 bg-[#36454F] rounded-lg shadow-md text-white">
+        <h1 className="text-2xl text-center mb-6 border-b border-white pb-2">Profile</h1>
+        
         {profile ? (
-          <div className="profile-info">
-            <p><strong>Username:</strong> {profile.username}</p>
-            <p><strong>Email:</strong> {profile.email}</p>
-            <p><strong>First Name:</strong> {profile.first_name}</p>
-            <p><strong>Last Name:</strong> {profile.last_name}</p>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3 mb-4">
+              <p className="text-sm">
+                <strong className="text-gray-300">Username:</strong>
+                <span className="ml-2">{profile.username}</span>
+              </p>
+              <p className="text-sm">
+                <strong className="text-gray-300">Email:</strong>
+                <span className="ml-2">{profile.email}</span>
+              </p>
+              <p className="text-sm">
+                <strong className="text-gray-300">First Name:</strong>
+                <span className="ml-2">{profile.first_name}</span>
+              </p>
+              <p className="text-sm">
+                <strong className="text-gray-300">Last Name:</strong>
+                <span className="ml-2">{profile.last_name}</span>
+              </p>
+            </div>
 
-            <div>
-              <Link to="/edit-profile" className="profile-edit-link">Edit Profile</Link>
+            <div className="flex flex-col sm:flex-row gap-3 mt-4">
+              <Link
+                to="/edit-profile"
+                className="flex-1 p-3 bg-[#4caf50] rounded-md hover:bg-[#45a049] transition-colors text-center text-white no-underline"
+              >
+                Edit Profile
+              </Link>
               <button
-                id="delete-account-btn"
                 onClick={() => setShowDeleteModal(true)}
-                style={{ marginLeft: '10px'}}
+                className="flex-1 p-3 bg-[#d32f2f] rounded-md hover:bg-[#b71c1c] transition-colors text-white"
               >
                 Delete Account
               </button>
             </div>
           </div>
         ) : (
-          <p>No profile data available.</p>
+          <p className="text-center text-gray-300">No profile data available.</p>
         )}
       </div>
 
       {showDeleteModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>Confirm Account Deletion</h3>
-            <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="w-full max-w-md p-8 bg-[#36454F] rounded-lg shadow-lg text-white mx-4">
+            <h3 className="text-xl mb-4 border-b border-white pb-2">Confirm Account Deletion</h3>
+            <p className="mb-6 text-sm text-gray-300">
+              Are you sure you want to delete your account? This action cannot be undone.
+            </p>
 
-            {deleteError && <div className="error" style={{ color: 'red' }}>{deleteError}</div>}
+            {deleteError && (
+              <div className="text-red-500 mb-4 text-center text-sm">{deleteError}</div>
+            )}
 
-            <div className="modal-actions">
+            <div className="flex gap-3">
               <button
                 type="button"
-                id="cancel"
                 onClick={() => {
                   setShowDeleteModal(false);
                   setDeleteError('');
                 }}
+                className="flex-1 p-3 bg-[#666] rounded-md hover:bg-[#555] transition-colors"
               >
                 Cancel
               </button>
               <button
-                id="delete"
                 onClick={handleDeleteConfirm}
+                className="flex-1 p-3 bg-[#d32f2f] rounded-md hover:bg-[#b71c1c] transition-colors"
               >
                 Delete
               </button>
