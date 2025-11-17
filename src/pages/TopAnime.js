@@ -55,7 +55,7 @@ const TopAnime = () => {
         if (err.response?.status === 429) {
           setError('Rate limit exceeded. Please wait a moment and try again.');
         } else if (err.response?.status === 404) {
-          setError('Page not found.');
+          setError('No results found.');
         } else {
           setError('Failed to fetch top anime. Please try again later.');
         }

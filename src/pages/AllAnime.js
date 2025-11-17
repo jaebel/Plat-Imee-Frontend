@@ -1,94 +1,110 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { useAnimeList } from '../context/AnimeListContext';
-import { useNavigate } from 'react-router-dom';
 import { handleViewDetails } from '../utils/handleViewDetails';
 import { handleAddToList } from '../utils/handleAddToList';
-import '../styles/TopAnime.css'; // Reuse shared stylesheet
+import AnimeCard from '../components/AnimeCard';
+import useAutoMessageClear from '../hooks/useAutoMessageClear';
 
 const AllAnime = () => {
-  const { user } = useContext(AuthContext);
-  const { setRecords } = useAnimeList(); // ✅ include cache setter
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useContext(AuthContext);
+  const { setRecords } = useAnimeList();
+
+  const params = new URLSearchParams(location.search);
+  const page = parseInt(params.get('page') || '1', 10);
 
   const [animeList, setAnimeList] = useState([]);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState({});
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [messages, setMessages] = useState({});
+
+  // Auto-clear messages after 3 seconds
+  useAutoMessageClear(messages, setMessages);
 
   useEffect(() => {
-    const fetchAnime = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        const response = await axios.get(`https://api.jikan.moe/v4/anime?page=${page}`);
-        setAnimeList(response.data.data || []);
-      } catch (err) {
-        console.error('Error fetching anime:', err);
-        setError('Failed to load anime list.');
-      } finally {
-        setLoading(false);
-      }
-    };
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [page]);
 
-    fetchAnime();
+  useEffect(() => {
+    const controller = new AbortController();
+    
+    setLoading(true);
+    setError('');
+
+    axios
+      .get(`https://api.jikan.moe/v4/anime?page=${page}`, {
+        signal: controller.signal
+      })
+      .then((res) => {
+        setAnimeList(res.data.data || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        // Ignore abort errors
+        if (err.name === 'CanceledError') return;
+        
+        console.error('Error fetching anime:', err);
+        console.error('Status:', err.response?.status);
+        console.error('Message:', err.response?.data?.message);
+        
+        // Better error messages
+        if (err.response?.status === 429) {
+          setError('Rate limit exceeded. Please wait a moment and try again.');
+        } else if (err.response?.status === 404) {
+          setError('Page not found.');
+        } else {
+          setError('Failed to load anime list. Please try again later.');
+        }
+        
+        setLoading(false);
+      });
+    
+    // Cleanup: cancel the request if component unmounts or dependencies change
+    return () => controller.abort();
   }, [page]);
 
   return (
-    <div className="top-anime-container">
-      <h1>All Anime</h1>
+    <div className="bg-[#1A2025] text-white px-5 py-10">
+      <h1 className="text-3xl mb-6 border-b-2 border-gray-600 pb-2">All Anime</h1>
 
-      {error && <p className="error">{error}</p>}
+      {loading && <p>Loading anime...</p>}
+      {error && <p className="text-[#FF5252]">{error}</p>}
 
-      {loading ? (
-        <p>Loading anime...</p>
-      ) : (
-        <ul className="anime-list">
-          {animeList.map(anime => (
-            <li key={anime.mal_id} className="anime-item">
-              <div className="anime-rank" style={{ visibility: 'hidden' }}>•</div>
+      <ul className="grid gap-8 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 list-none p-0 m-0">
+        {animeList.map((anime) => (
+          <AnimeCard
+            key={anime.mal_id}
+            anime={anime}
+            message={messages[anime.mal_id]}
+            onAddToList={() =>
+              handleAddToList(anime.mal_id, user, setMessages, setRecords)
+            }
+            onViewDetails={() => handleViewDetails(anime, navigate)}
+          />
+        ))}
+      </ul>
 
-              <img
-                src={anime.images?.jpg?.image_url}
-                alt={anime.title}
-                className="anime-image"
-                onClick={() => handleViewDetails(anime, navigate)}
-              />
-
-              <div className="anime-info">
-                <h2>{anime.title_english || anime.title}</h2>
-                <p><strong>Type:</strong> {anime.type || 'TV'}</p>
-                <p><strong>Aired:</strong> {anime.aired?.string || 'Unknown'}</p>
-                <p><strong>Rating:</strong> {anime.score ?? 'N/A'}</p>
-
-                {messages[anime.mal_id] && (
-                  <p className={`message ${messages[anime.mal_id].includes('added') ? 'success' : 'fail'}`}>
-                    {messages[anime.mal_id]}
-                  </p>
-                )}
-
-                <div className="anime-actions">
-                  <button onClick={() => handleAddToList(anime.mal_id, user, setMessages, setRecords)}>
-                    Add to My List
-                  </button>
-                  <button onClick={() => handleViewDetails(anime, navigate)}>
-                    View Details
-                  </button>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <div className="pagination">
-        <button onClick={() => setPage(prev => Math.max(prev - 1, 1))} disabled={page === 1}>
+      <div className="mt-10 flex justify-center items-center gap-4">
+        <button
+          onClick={() => navigate(`?page=${page - 1}`)}
+          disabled={page === 1}
+          className="bg-[#36454F] px-4 py-2 rounded-md disabled:opacity-50 hover:bg-[#2c3a43] transition"
+        >
           Previous
         </button>
-        <span className="page-number">Page {page}</span>
-        <button onClick={() => setPage(prev => prev + 1)}>Next</button>
+
+        <span className="font-bold">Page {page}</span>
+
+        <button
+          onClick={() => navigate(`?page=${page + 1}`)}
+          className="bg-[#36454F] px-4 py-2 rounded-md hover:bg-[#2c3a43] transition"
+        >
+          Next
+        </button>
       </div>
     </div>
   );
