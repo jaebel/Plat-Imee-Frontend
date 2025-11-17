@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import '../styles/GenrePicker.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const JIKAN_GENRE_OPTIONS = [
   { id: 1, name: "Action" },
@@ -34,7 +33,7 @@ const JIKAN_GENRE_OPTIONS = [
   { id: 31, name: "Super Power" },
   { id: 32, name: "Vampire" },
   { id: 35, name: "Harem" },
-  { id: 36, name: "Sllice of Life" },
+  { id: 36, name: "Slice of Life" },
   { id: 37, name: "Supernatural" },
   { id: 38, name: "Military" },
   { id: 39, name: "Detective" },
@@ -96,33 +95,52 @@ const GenrePicker = () => {
 
   const handleSubmit = () => {
     if (selectedGenres.length === 0) {
-      setError('Please select at least one genre.');
+      setError("Please select at least one genre.");
       return;
     }
-    const query = selectedGenres.join(',');
-    navigate(`/genre-results?genres=${query}`);
+    navigate(`/genre-results?genres=${selectedGenres.join(",")}`);
   };
 
   return (
-    <div className="genre-picker-container">
-      <h1>Browse Anime by Genre</h1>
-      <p>Select one or more genres, then click 'Search'.</p>
+    <div className="min-h-screen w-full bg-neutral-900 text-neutral-100 px-6 py-10">
+      <h1 className="text-3xl font-semibold border-b border-neutral-700 pb-3 mb-4">
+        Browse Anime by Genre
+      </h1>
 
-      <div className="genre-grid">
-        {JIKAN_GENRE_OPTIONS.map(opt => (
-          <label key={opt.id}>
+      <p className="text-neutral-300 mb-6">
+        Select one or more genres, then click “Search”.
+      </p>
+
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-3 mb-6">
+        {JIKAN_GENRE_OPTIONS.map((opt) => (
+          <label
+            key={opt.id}
+            className={`flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition 
+              ${
+                selectedGenres.includes(opt.id)
+                  ? "bg-[#DEB8B8]  hover:bg-[#d6a8a8] text-[#000000]"
+                  : "bg-neutral-800 hover:bg-neutral-700"
+              }`}
+          >
             <input
               type="checkbox"
               checked={selectedGenres.includes(opt.id)}
               onChange={() => handleGenreChange(opt.id)}
+              className="accent-[#000000]"
             />
-            {opt.name}
+            <span>{opt.name}</span>
           </label>
         ))}
       </div>
+        
+      <button
+        onClick={handleSubmit}
+        className="bg-green-600 hover:bg-green-500 px-5 py-2 rounded-md text-white font-medium transition"
+      >
+        Search
+      </button>
 
-      <button onClick={handleSubmit}>Search</button>
-      {error && <p className="error">{error}</p>}
+      {error && <p className="text-red-400 mt-4">{error}</p>}
     </div>
   );
 };

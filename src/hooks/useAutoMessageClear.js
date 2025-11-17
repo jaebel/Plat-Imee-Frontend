@@ -3,8 +3,9 @@ import { useEffect, useRef } from 'react';
 const useAutoMessageClear = (messages, setMessages, duration = 3000) => {
   const timersRef = useRef({});
 
+  // Main logic: create timers, clean removed messages
   useEffect(() => {
-    // Cleanup timers for messages that were removed externally (this is just incase)
+    // Clean orphan timers
     Object.keys(timersRef.current).forEach((id) => {
       if (!messages[id]) {
         clearTimeout(timersRef.current[id]);
@@ -12,7 +13,7 @@ const useAutoMessageClear = (messages, setMessages, duration = 3000) => {
       }
     });
 
-    // Set new timers for messages that don't have one yet (and handle deletion of messages and timers after 3 seconds)
+    // Create timers for new messages
     Object.keys(messages).forEach((id) => {
       if (!timersRef.current[id]) {
         timersRef.current[id] = setTimeout(() => {
@@ -21,17 +22,21 @@ const useAutoMessageClear = (messages, setMessages, duration = 3000) => {
             delete updated[id];
             return updated;
           });
+
           delete timersRef.current[id];
         }, duration);
       }
     });
-
-    // Cleanup function - clear all timers on unmount or when messages change
-    return () => {
-      Object.values(timersRef.current).forEach(clearTimeout);
-      timersRef.current = {};
-    };
   }, [messages, setMessages, duration]);
+
+  // Cleanup on unmount only
+  useEffect(() => {
+    const timers = timersRef.current; // capture stable reference
+
+    return () => {
+      Object.values(timers).forEach(clearTimeout);
+    };
+  }, []);
 };
 
 export default useAutoMessageClear;
