@@ -3,7 +3,6 @@ import { AuthContext } from '../context/AuthContext';
 import { useAnimeList } from '../context/AnimeListContext';
 import axiosInstance from '../api/axiosInstance';
 import { Link } from 'react-router-dom';
-import '../styles/MyAnimeList.css';
 
 const TABS = [
     { label: 'All Anime', value: 'ALL' },
@@ -153,144 +152,194 @@ const MyAnimeList = () => {
         handleEditClick(record);
     };
 
-    if (loading) return <div className="my-anime-page">Loading your anime list...</div>;
-    if (error) return <div className="my-anime-page" style={{ color: 'red' }}>{error}</div>;
-    if (!user) return <div className="my-anime-page" style={{ color: 'red' }}>No user logged in.</div>;
+    if (loading) {
+        return (
+            <div className="bg-[#1a2025] min-h-screen pt-12 text-white text-center">
+                Loading your anime list...
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="bg-[#1a2025] min-h-screen pt-12 text-red-500 text-center">
+                {error}
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="bg-[#1a2025] min-h-screen pt-12 text-red-500 text-center">
+                No user logged in.
+            </div>
+        );
+    }
 
     return (
-        <div className="my-anime-page">
-            <div className="my-anime-list-container">
-                <h1>My Anime List</h1>
+        <div className="bg-[#1a2025] min-h-screen pt-12 pb-20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-[#DEB8B8] rounded-lg">
+                <h1 className="text-3xl font-semibold mb-6 border-b-2 border-[#444] pb-3 text-[#f0f0f0]">
+                    My Anime List
+                </h1>
 
-                <div className="my-anime-list-tabs">
+                {/* Tabs */}
+                <div className="flex flex-wrap gap-2 mb-6">
                     {TABS.map(tab => (
                         <button
                             key={tab.value}
                             onClick={() => setActiveTab(tab.value)}
-                            className={activeTab === tab.value ? 'active' : ''}
+                            className={`px-4 py-2 text-sm rounded transition-colors ${
+                                activeTab === tab.value
+                                    ? 'bg-[#3f3f3f] text-white font-bold'
+                                    : 'bg-[#36454F] text-[#ccc] hover:bg-[#3f3f3f] hover:text-white'
+                            }`}
                         >
                             {tab.label}
                         </button>
                     ))}
                 </div>
 
+                {/* Content */}
                 {filteredRecords.length === 0 ? (
-                    <p>No anime found in this category.</p>
+                    <p className="text-[#f0f0f0] text-center py-8">
+                        No anime found in this category.
+                    </p>
                 ) : (
-                    <table className="my-anime-list-table">
-                        <thead>
-                            <tr>
-                                {['#', 'MAL ID', 'Anime Name', 'Status', 'Rating', 'Episodes Watched', 'Actions'].map((heading, i) => (
-                                    <th key={i}>{heading}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredRecords.map((rec, idx) => {
-                                const isEditing = editingId === rec.id;
-                                return (
-                                    <tr key={rec.id} onClick={(e) => handleRowClick(e, rec)}>
-                                        <td>{idx + 1}</td>
-                                        <td>
-                                            <Link
-                                                to={`/anime/${rec.malId}`}
-                                                className="mal-id-link"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                {rec.malId}
-                                            </Link>
-                                        </td>
-                                        <td>{animeNames[rec.malId] || 'Unknown Title'}</td>
-                                        <td>
-                                            {isEditing ? (
-                                                <select
-                                                    name="status"
-                                                    value={editData.status}
-                                                    onChange={handleEditChange}
-                                                    onKeyDown={(e) => e.key === 'Enter' && handleSave(rec.id)}
-                                                    required
+                    <div className="overflow-x-auto rounded-lg">
+                        <table className="w-full bg-[#36454F] text-[#f0f0f0] text-sm">
+                            <thead className="bg-[#292929]">
+                                <tr>
+                                    {['#', 'MAL ID', 'Anime Name', 'Status', 'Rating', 'Episodes Watched', 'Actions'].map((heading, i) => (
+                                        <th key={i} className="px-3 py-3 text-left text-[#ddd] font-medium">
+                                            {heading}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredRecords.map((rec, idx) => {
+                                    const isEditing = editingId === rec.id;
+                                    return (
+                                        <tr
+                                            key={rec.id}
+                                            onClick={(e) => handleRowClick(e, rec)}
+                                            className="border-b border-[#333] hover:bg-[#2c2c2c] cursor-pointer transition-colors"
+                                        >
+                                            <td className="px-3 py-3">{idx + 1}</td>
+                                            <td className="px-3 py-3">
+                                                <Link
+                                                    to={`/anime/${rec.malId}`}
+                                                    className="text-[#DEB8B8] underline font-bold hover:text-[#867070] transition-colors"
+                                                    onClick={(e) => e.stopPropagation()}
                                                 >
-                                                    <option value="">--Select--</option>
-                                                    <option value="WATCHING">Watching</option>
-                                                    <option value="COMPLETED">Completed</option>
-                                                    <option value="ON_HOLD">On Hold</option>
-                                                    <option value="PLAN_TO_WATCH">Plan to Watch</option>
-                                                    <option value="DROPPED">Dropped</option>
-                                                </select>
-                                            ) : (
-                                                rec.status || 'N/A'
-                                            )}
-                                        </td>
-                                        <td>
-                                            {isEditing ? (
-                                                <input
-                                                    type="number"
-                                                    name="rating"
-                                                    step="0.1"
-                                                    min="0"
-                                                    max="10"
-                                                    value={editData.rating}
-                                                    onChange={handleEditChange}
-                                                    onKeyDown={(e) => e.key === 'Enter' && handleSave(rec.id)}
-                                                    placeholder="0 - 10"
-                                                />
-                                            ) : (
-                                                rec.rating ?? 'Not rated'
-                                            )}
-                                        </td>
-                                        <td>
-                                            {isEditing ? (
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5em' }}>
-                                                    <input
-                                                        type="number"
-                                                        name="episodesWatched"
-                                                        min="0"
-                                                        max={episodeCounts[rec.malId] || undefined}
-                                                        value={editData.episodesWatched}
+                                                    {rec.malId}
+                                                </Link>
+                                            </td>
+                                            <td className="px-3 py-3">{animeNames[rec.malId] || 'Unknown Title'}</td>
+                                            <td className="px-3 py-3">
+                                                {isEditing ? (
+                                                    <select
+                                                        name="status"
+                                                        value={editData.status}
                                                         onChange={handleEditChange}
                                                         onKeyDown={(e) => e.key === 'Enter' && handleSave(rec.id)}
-                                                        placeholder="0"
-                                                        style={{ width: '70px' }}
+                                                        required
+                                                        className="bg-[#2c2c2c] text-white border border-[#444] rounded px-2 py-1 text-sm"
+                                                    >
+                                                        <option value="">--Select--</option>
+                                                        <option value="WATCHING">Watching</option>
+                                                        <option value="COMPLETED">Completed</option>
+                                                        <option value="ON_HOLD">On Hold</option>
+                                                        <option value="PLAN_TO_WATCH">Plan to Watch</option>
+                                                        <option value="DROPPED">Dropped</option>
+                                                    </select>
+                                                ) : (
+                                                    rec.status || 'N/A'
+                                                )}
+                                            </td>
+                                            <td className="px-3 py-3">
+                                                {isEditing ? (
+                                                    <input
+                                                        type="number"
+                                                        name="rating"
+                                                        step="0.1"
+                                                        min="0"
+                                                        max="10"
+                                                        value={editData.rating}
+                                                        onChange={handleEditChange}
+                                                        onKeyDown={(e) => e.key === 'Enter' && handleSave(rec.id)}
+                                                        placeholder="0 - 10"
+                                                        className="bg-[#2c2c2c] text-white border border-[#444] rounded px-2 py-1 w-20 text-sm focus:outline-none focus:ring-2 focus:ring-[#4caf50]"
                                                     />
-                                                    <span style={{ fontSize: '0.85rem', color: '#ccc' }}>
-                                                        Max: {episodeCounts[rec.malId] ?? 'Unknown'}
-                                                    </span>
-                                                </div>
-                                            ) : (
-                                                rec.episodesWatched ?? 'N/A'
-                                            )}
-                                        </td>
-                                        <td>
-                                            {isEditing ? (
-                                                <>
-                                                    <button onClick={() => handleSave(rec.id)}>Save</button>
-                                                    <button
-                                                        onClick={handleCancelEdit}
-                                                        style={{ marginLeft: '0.5em' }}
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <button onClick={(e) => { e.stopPropagation(); handleEditClick(rec); }}>Edit</button>
-                                                    <button
-                                                        className="delete-btn"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDelete(rec.id);
-                                                        }}
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </>
-                                            )}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                                ) : (
+                                                    rec.rating ?? 'Not rated'
+                                                )}
+                                            </td>
+                                            <td className="px-3 py-3">
+                                                {isEditing ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            type="number"
+                                                            name="episodesWatched"
+                                                            min="0"
+                                                            max={episodeCounts[rec.malId] || undefined}
+                                                            value={editData.episodesWatched}
+                                                            onChange={handleEditChange}
+                                                            onKeyDown={(e) => e.key === 'Enter' && handleSave(rec.id)}
+                                                            placeholder="0"
+                                                            className="bg-[#2c2c2c] text-white border border-[#444] rounded px-2 py-1 w-20 text-sm focus:outline-none focus:ring-2 focus:ring-[#4caf50]"
+                                                        />
+                                                        <span className="text-xs text-[#ccc] whitespace-nowrap">
+                                                            Max: {episodeCounts[rec.malId] ?? 'Unknown'}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    rec.episodesWatched ?? 'N/A'
+                                                )}
+                                            </td>
+                                            <td className="px-3 py-3">
+                                                {isEditing ? (
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={() => handleSave(rec.id)}
+                                                            className="bg-[#4caf50] text-white px-3 py-1.5 rounded text-xs hover:bg-[#3e8e41] transition-colors"
+                                                        >
+                                                            Save
+                                                        </button>
+                                                        <button
+                                                            onClick={handleCancelEdit}
+                                                            className="bg-[#666] text-white px-3 py-1.5 rounded text-xs hover:bg-[#555] transition-colors"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleEditClick(rec); }}
+                                                            className="bg-[#4caf50] text-white px-3 py-1.5 rounded text-xs hover:bg-[#3e8e41] transition-colors"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDelete(rec.id);
+                                                            }}
+                                                            className="bg-[#ff4d4d] text-white px-3 py-1.5 rounded text-xs hover:bg-[#e63939] transition-colors"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
             </div>
         </div>

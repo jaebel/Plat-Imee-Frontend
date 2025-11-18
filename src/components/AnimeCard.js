@@ -73,7 +73,7 @@ const AnimeCard = ({
 
           <button
             onClick={onViewDetails}
-            className="w-full bg-[#07161d] hover:bg-blue-700 text-white px-2 py-1.5 sm:px-3 sm:py-2 rounded-md font-medium text-xs sm:text-sm shadow transition"
+            className="w-full bg-[#07161d] hover:bg-[#12394b] text-white px-2 py-1.5 sm:px-3 sm:py-2 rounded-md font-medium text-xs sm:text-sm shadow transition"
           >
             View Details
           </button>

@@ -89,14 +89,14 @@ const Home = () => {
         <div className="absolute top-0 left-0 w-full h-4 bg-gradient-to-b from-[#00000040] to-transparent" />
         <div className="flex flex-col md:flex-row justify-between gap-8 max-w-full mx-auto">
           <div className="flex-1 bg-[#516977] p-6 rounded-lg shadow-md text-center md:text-left">
-            <h3 className="text-xl font-bold mb-2">About Plat-Imee</h3>
+            <h3 className="text-xl font-bold mb-2 underline">About Plat-Imee</h3>
             <p>Plat-Imee is a full-stack anime tracking and recommendation platform designed to offer a cleaner and more focused alternative to existing services.
               It uses a Spring Boot Kotlin backend alongside a React frontend to provide users with a reliable space to manage profiles, maintain watch lists,
               and browse titles without the visual clutter that tends to dominate similar platforms.
               The overall aim was straightforward: build something that feels organised, responsive, and genuinely usable.</p>
           </div>
           <div className="flex-1 bg-[#516977] p-6 rounded-lg shadow-md text-center md:text-left">
-            <h3 className="text-xl font-bold mb-2">Recommendations</h3>
+            <h3 className="text-xl font-bold mb-2 underline">Recommendations</h3>
             <p>At the centre of the recommendation microservice is a shallow neural network built in PyTorch implementing a matrix factorisation model.
               It learns by running inputs through a forward pass to produce rating predictions, then using backpropagation to measure the error and update its parameters before its next attempt. <br/><br/>
               
@@ -115,7 +115,7 @@ const Home = () => {
               The best-performing configuration was then used to retrain the final model deployed in Plat-Imee, replacing earlier guesswork with a setup grounded in actual validation performance.</p>
           </div>
           <div className="flex-1 bg-[#516977] p-6 rounded-lg shadow-md text-center md:text-left">
-            <h3 className="text-xl font-bold mb-2">Developer notes</h3>
+            <h3 className="text-xl font-bold mb-2 underline">Developer notes</h3>
             <p>This project was an opportunity to improve my skills in several areas:</p> <br/>
             <ul>
               <li><strong>Frontend:</strong> React, JavaScript, HTML, CSS, and Tailwind CSS – creating responsive, interactive, and user-friendly interfaces.</li><br/>
