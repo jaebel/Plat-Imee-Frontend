@@ -21,6 +21,7 @@ const SignUp = () => {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const emailPattern = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
   const passwordPattern = /^(?!.*\s)(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -61,6 +62,8 @@ const SignUp = () => {
       }
     }
 
+    setIsLoading(true);
+
     try {
       const response = await axiosInstance.post('/users', form);
       setSuccess('User registered successfully!');
@@ -69,6 +72,8 @@ const SignUp = () => {
     } catch (err) {
       console.error(err);
       setError(err.response?.data || 'Registration failed.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -101,7 +106,8 @@ const SignUp = () => {
               value={form.username}
               onChange={handleChange}
               required
-              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
+              disabled={isLoading}
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F] disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </label>
 
@@ -113,7 +119,8 @@ const SignUp = () => {
               value={form.email}
               onChange={handleChange}
               required
-              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
+              disabled={isLoading}
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F] disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </label>
 
@@ -125,7 +132,8 @@ const SignUp = () => {
               value={form.firstName}
               onChange={handleChange}
               required
-              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
+              disabled={isLoading}
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F] disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </label>
 
@@ -137,7 +145,8 @@ const SignUp = () => {
               value={form.lastName}
               onChange={handleChange}
               required
-              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
+              disabled={isLoading}
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F] disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </label>
 
@@ -149,7 +158,8 @@ const SignUp = () => {
               value={form.password}
               onChange={handleChange}
               required
-              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
+              disabled={isLoading}
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F] disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </label>
 
@@ -161,15 +171,27 @@ const SignUp = () => {
               value={form.confirmPassword}
               onChange={handleChange}
               required
-              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F]"
+              disabled={isLoading}
+              className="mt-1 p-3 rounded-md border border-[#444] bg-[#DEB8B8] text-black focus:outline-none focus:ring-2 focus:ring-[#36454F] disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </label>
 
           <button
             type="submit"
-            className="mt-4 p-3 bg-[#4caf50] rounded-md hover:bg-[#45a049] transition-colors"
+            disabled={isLoading}
+            className="mt-4 p-3 bg-[#4caf50] rounded-md hover:bg-[#45a049] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            Register
+            {isLoading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Registering...
+              </>
+            ) : (
+              'Register'
+            )}
           </button>
         </form>
 
