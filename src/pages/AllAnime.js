@@ -21,6 +21,7 @@ const AllAnime = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [messages, setMessages] = useState({});
+  const [hasNextPage, setHasNextPage] = useState(true);
 
   // Auto-clear messages after 3 seconds
   useAutoMessageClear(messages, setMessages);
@@ -43,6 +44,7 @@ const AllAnime = () => {
       })
       .then(res => {
         setAnimeList(res.data.data || []);
+        setHasNextPage(res.data.pagination?.has_next_page ?? false);
         setLoading(false);
       })
       .catch(err => {
@@ -101,7 +103,8 @@ const AllAnime = () => {
 
         <button
           onClick={() => navigate(`?page=${page + 1}`)}
-          className="bg-[#36454F] px-4 py-2 rounded-md hover:bg-[#2c3a43] transition"
+          disabled={!hasNextPage}
+          className="bg-[#36454F] px-4 py-2 rounded-md hover:bg-[#2c3a43] transition disabled:opacity-50"
         >
           Next
         </button>

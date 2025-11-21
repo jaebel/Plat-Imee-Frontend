@@ -22,6 +22,7 @@ const GenreResults = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [messages, setMessages] = useState({});
+  const [hasNextPage, setHasNextPage] = useState(true); // 👈 NEW
 
   // Auto-clear messages after 3 seconds
   useAutoMessageClear(messages, setMessages);
@@ -51,6 +52,7 @@ const GenreResults = () => {
       .get(url, { signal: controller.signal })
       .then(res => {
         setAnimeList(res.data.data || []);
+        setHasNextPage(res.data.pagination?.has_next_page ?? false);
         setLoading(false);
       })
       .catch(err => {
@@ -102,9 +104,7 @@ const GenreResults = () => {
 
       <div className="mt-10 flex justify-center items-center gap-4">
         <button
-          onClick={() => {
-            navigate(`?genres=${genres}&page=${page - 1}`);
-          }}
+          onClick={() => navigate(`?genres=${genres}&page=${page - 1}`)}
           disabled={page === 1}
           className="bg-[#36454F] px-4 py-2 rounded-md disabled:opacity-50 hover:bg-[#2c3a43] transition"
         >
@@ -114,10 +114,9 @@ const GenreResults = () => {
         <span className="font-bold">Page {page}</span>
 
         <button
-          onClick={() => {
-            navigate(`?genres=${genres}&page=${page + 1}`);
-          }}
-          className="bg-[#36454F] px-4 py-2 rounded-md hover:bg-[#2c3a43] transition"
+          onClick={() => navigate(`?genres=${genres}&page=${page + 1}`)}
+          disabled={!hasNextPage} // 👈 NEXT now disables correctly
+          className="bg-[#36454F] px-4 py-2 rounded-md hover:bg-[#2c3a43] transition disabled:opacity-50"
         >
           Next
         </button>
