@@ -31,22 +31,24 @@ const TopAnime = () => {
 
   useEffect(() => {
     const controller = new AbortController();
-    
+
+    // Reset state when the page changes
+    setTopAnime([]);
     setLoading(true);
     setError('');
 
     axios
       .get(`https://api.jikan.moe/v4/top/anime?page=${page}`, {
-        signal: controller.signal
+        signal: controller.signal,
       })
       .then(res => {
         setTopAnime(res.data.data || []);
         setLoading(false);
       })
       .catch(err => {
-        // Ignore abort errors
+        // Request was canceled -> ignore
         if (err.name === 'CanceledError') return;
-        
+
         console.error('Error fetching top anime:', err);
         console.error('Status:', err.response?.status);
         console.error('Message:', err.response?.data?.message);

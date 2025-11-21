@@ -31,50 +31,55 @@ const SeasonalAnime = () => {
 
   useEffect(() => {
     const controller = new AbortController();
-    
+
+    // Reset state when the page changes
+    setAnimeList([]);
     setLoading(true);
     setError('');
+
     axios
       .get(`https://api.jikan.moe/v4/seasons/now?page=${page}`, {
-        signal: controller.signal
+        signal: controller.signal,
       })
       .then(res => {
         setAnimeList(res.data.data || []);
         setLoading(false);
       })
-      .catch((err) => {
-        // Ignore abort errors
+      .catch(err => {
+        // Request was canceled -> ignore
         if (err.name === 'CanceledError') return;
 
+        // Better error messages
         console.error('Error fetching seasonal anime:', err);
         console.error('Status:', err.response?.status);
         console.error('Message:', err.response?.data?.message);
 
-        // Better error messages
         if (err.response?.status === 429) {
           setError('Rate limit exceeded. Please wait a moment and try again.');
         } else if (err.response?.status === 404) {
           setError('No results found.');
         } else {
-          setError('Failed to fetch upcoming anime. Please try again later.');
+          setError('Failed to fetch seasonal anime. Please try again later.');
         }
 
         setLoading(false);
       });
 
-    // Cleanup: cancel the request if component unmounts or dependencies change
+    // Cleanup: cancel the request on unmount or dependency change
     return () => controller.abort();
-  }, [page]);  
+  }, [page]);
 
   return (
     <div className="bg-[#1A2025] text-white px-5 py-10">
-      <h1 className="text-3xl mb-6 border-b-2 border-gray-600 pb-2">Trending This Season</h1>  
+      <h1 className="text-3xl mb-6 border-b-2 border-gray-600 pb-2">
+        Trending This Season
+      </h1>
 
-      {loading && <p>Loading seasonal anime...</p>}
+      {loading && <p>Loading...</p>}
       {error && <p className="text-[#FF5252]">{error}</p>}
 
       <ul className="grid gap-8 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 list-none p-0 m-0">
-        {animeList.map((item) => (
+        {animeList.map(item => (
           <AnimeCard
             key={item.mal_id}
             anime={item}

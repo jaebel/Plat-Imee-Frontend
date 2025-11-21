@@ -31,27 +31,28 @@ const AllAnime = () => {
 
   useEffect(() => {
     const controller = new AbortController();
-    
+
+    // Reset state immediately on page change
+    setAnimeList([]);
     setLoading(true);
     setError('');
 
     axios
       .get(`https://api.jikan.moe/v4/anime?page=${page}`, {
-        signal: controller.signal
+        signal: controller.signal,
       })
-      .then((res) => {
+      .then(res => {
         setAnimeList(res.data.data || []);
         setLoading(false);
       })
-      .catch((err) => {
-        // Ignore abort errors
+      .catch(err => {
+        // Ignore cancelled requests
         if (err.name === 'CanceledError') return;
-        
+
         console.error('Error fetching anime:', err);
         console.error('Status:', err.response?.status);
         console.error('Message:', err.response?.data?.message);
-        
-        // Better error messages
+
         if (err.response?.status === 429) {
           setError('Rate limit exceeded. Please wait a moment and try again.');
         } else if (err.response?.status === 404) {
@@ -59,11 +60,10 @@ const AllAnime = () => {
         } else {
           setError('Failed to load anime list. Please try again later.');
         }
-        
+
         setLoading(false);
       });
-    
-    // Cleanup: cancel the request if component unmounts or dependencies change
+
     return () => controller.abort();
   }, [page]);
 
@@ -71,11 +71,11 @@ const AllAnime = () => {
     <div className="bg-[#1A2025] text-white px-5 py-10">
       <h1 className="text-3xl mb-6 border-b-2 border-gray-600 pb-2">All Anime</h1>
 
-      {loading && <p>Loading anime...</p>}
+      {loading && <p>Loading...</p>}
       {error && <p className="text-[#FF5252]">{error}</p>}
 
       <ul className="grid gap-8 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 list-none p-0 m-0">
-        {animeList.map((anime) => (
+        {animeList.map(anime => (
           <AnimeCard
             key={anime.mal_id}
             anime={anime}
