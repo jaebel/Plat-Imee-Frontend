@@ -160,6 +160,7 @@ const AnimeDetails = () => {
               </p>
               <p className="text-gray-300 sm:col-span-2">
                 <strong className="text-white">Genres:</strong> {anime.genres.join(", ")}
+                {/* <strong className="text-white">Genres:</strong> {jikanData?.genres?.map(g => g.name).join(", ")} */}
               </p>
             </div>
           </div>

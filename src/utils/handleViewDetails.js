@@ -35,7 +35,7 @@ export async function handleViewDetails(anime, navigate) {
             score: anime.score || 0.0,
             aired: anime.aired?.string || '',
             premiered: anime.season || '',
-            genres: []
+            genres: anime.genres?.map(g => g.name) || []
           };
           await axiosInstance.post('/anime', payload);
           localCache.add(malId); // mark as now existing
