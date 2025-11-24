@@ -27,6 +27,11 @@ export async function handleViewDetails(anime, navigate) {
     } catch (err) {
       if (err.response && err.response.status === 404) {
         try {
+          // Combine genres and themes into a single array
+          const genreNames = anime.genres?.map(g => g.name) || [];
+          const themeNames = anime.themes?.map(t => t.name) || [];
+          const allGenres = [...genreNames, ...themeNames];
+
           const payload = {
             malId,
             name: anime.title_english || anime.title,
@@ -35,7 +40,7 @@ export async function handleViewDetails(anime, navigate) {
             score: anime.score || 0.0,
             aired: anime.aired?.string || '',
             premiered: anime.season || '',
-            genres: anime.genres?.map(g => g.name) || []
+            genres: allGenres
           };
           await axiosInstance.post('/anime', payload);
           localCache.add(malId); // mark as now existing
