@@ -37,36 +37,50 @@ const SearchAnime = () => {
     setLoading(true);
     setError('');
 
-    axios
-    .get(
-      `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&page=${page}`,
-      { signal: controller.signal }
-    )
-    .then(res => {
-      setAnimeList(res.data.data || []);
-      setHasNextPage(res.data.pagination?.has_next_page ?? false);
-      setLoading(false);
-    })
-    .catch((err) => {
+    const fetchWithRetry = async (retries = 1) => {
+      try {
+        const res = await axios.get(
+          `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&page=${page}`,
+          { signal: controller.signal, timeout: 8000 }
+        );
+        setAnimeList(res.data.data || []);
+        setHasNextPage(res.data.pagination?.has_next_page ?? false);
+        setLoading(false);
+      } catch (err) {
         // Ignore abort errors
         if (err.name === 'CanceledError') return;
-        
+
+        const status = err.response?.status;
+        const isTimeoutOrGatewayError =
+          err.code === 'ECONNABORTED' || status === 504 || status === 503;
+
+        // Retry once on timeout or gateway errors before giving up
+        if (isTimeoutOrGatewayError && retries > 0) {
+          await new Promise((r) => setTimeout(r, 1000));
+          return fetchWithRetry(retries - 1);
+        }
+
         console.error('Error searching anime:', err);
-        console.error('Status:', err.response?.status);
+        console.error('Status:', status);
         console.error('Message:', err.response?.data?.message);
-        
+
         // Better error messages
-        if (err.response?.status === 429) {
+        if (status === 429) {
           setError('Rate limit exceeded. Please wait a moment and try again.');
-        } else if (err.response?.status === 404) {
+        } else if (status === 404) {
           setError('No results found.');
+        } else if (isTimeoutOrGatewayError) {
+          setError('Search is temporarily unavailable. Please try again in a moment.');
         } else {
           setError('Failed to fetch upcoming anime. Please try again later.');
         }
-        
+
         setLoading(false);
-      });
-    
+      }
+    };
+
+    fetchWithRetry();
+
     // Cleanup: cancel the request if component unmounts or dependencies change
     return () => controller.abort();
   }, [page, query]);
